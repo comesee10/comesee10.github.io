@@ -395,12 +395,17 @@ function renderPOI(q = '') {
 }
 document.getElementById('sortBtn'); // placeholder (кнопка ниже в DOM добавляется динамически)
 
+function pathLength(pts) {
+  let s = 0;
+  for (let i = 1; i < pts.length; i++) s += map.distance(L.latLng(pts[i-1]), L.latLng(pts[i]));
+  return s;
+}
 function renderStreets(q = '') {
   streetList.innerHTML = '';
   const seen = {};
   STREETS_WAYS.filter(s => !q || s[0].toLowerCase().includes(q.toLowerCase())).forEach(s => {
     if (seen[s[0]]) return; seen[s[0]] = true;
-    const len = L.polyline(s[2]).getLength();
+    const len = pathLength(s[2]);
     const d = document.createElement('div');
     d.className = 'street';
     d.innerHTML = `<span>${s[0]}</span><small>${fmtM(len)}</small>`;
