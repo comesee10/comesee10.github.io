@@ -47,14 +47,25 @@
     border:1px solid rgba(255,220,120,.35); border-radius:20px; padding:4px 12px; }
   #weatherChip { display:flex; align-items:center; gap:8px; font-size:13px; color:#fff;
     background:rgba(127,209,255,.12); border:1px solid rgba(127,209,255,.35);
-    border-radius:20px; padding:5px 14px; white-space:nowrap; cursor:default; }
+    border-radius:20px; padding:5px 14px; white-space:nowrap; cursor:pointer; }
   #weatherChip .t { font-weight:700; font-size:15px; }
   #weatherChip .d { color:#9fc4e8; font-size:11px; }
   .hbtn { height:38px; min-width:38px; border:none; cursor:pointer;
     background:rgba(127,209,255,.12); color:#cfe6ff; font-size:17px;
     border:1px solid rgba(127,209,255,.3); border-radius:12px; }
   .hbtn:hover { background:rgba(127,209,255,.25); }
+  .hbtn.on { background:rgba(127,209,255,.4); box-shadow:0 0 8px rgba(127,209,255,.6); }
   #map { position:absolute; top:0; left:0; right:0; bottom:0; }
+  #map.measure-mode { cursor:crosshair; }
+  #measureChip { position:absolute; bottom:18px; left:50%; transform:translateX(-50%);
+    background:var(--panel); border:1px solid var(--accent); color:#fff; font-size:14px; font-weight:700;
+    padding:8px 18px; border-radius:20px; z-index:1100; display:none; box-shadow:0 4px 14px rgba(0,0,0,.4); }
+
+  #snow { position:fixed; inset:0; pointer-events:none; z-index:9000; overflow:hidden; display:none; }
+  #snow.on { display:block; }
+  #snow div { position:absolute; top:-20px; color:#fff; opacity:.9; text-shadow:0 0 4px rgba(180,220,255,.8);
+    animation:fall linear infinite; }
+  @keyframes fall { to { transform:translateY(115vh) rotate(360deg); } }
 
   .panel { position:absolute; top:14px; right:0; width:330px; max-height:calc(100% - 28px);
     background:var(--panel); backdrop-filter:blur(6px); border-radius:12px 0 0 12px;
@@ -65,8 +76,8 @@
     height:34px; width:34px; padding:0; border:none; border-radius:8px 0 0 8px;
     background:var(--panel); color:#cfe6ff; font-size:16px; cursor:pointer;
     border:1px solid rgba(128,180,255,.25); border-right:none; }
-  .panel-tabs { display:flex; border-bottom:1px solid rgba(128,180,255,.25); }
-  .panel-tabs button { flex:1; padding:10px 0; background:transparent; color:#8fb4d8; border:none;
+  .panel-tabs { display:flex; border-bottom:1px solid rgba(128,180,255,.25); flex-wrap:wrap; }
+  .panel-tabs button { flex:1; min-width:22%; padding:10px 0; background:transparent; color:#8fb4d8; border:none;
     font-size:13px; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
   .panel-tabs button.active { color:#fff; border-bottom-color:var(--accent); }
   .panel-search { padding:8px 12px 6px; }
@@ -97,6 +108,22 @@
   .infobox b { color:#fff; }
   .infobox .row { display:flex; gap:10px; margin:7px 0; align-items:flex-start; }
   .infobox .row .e { font-size:18px; width:24px; text-align:center; }
+  .infobox a { color:var(--accent); }
+
+  .wx { padding:10px 12px; }
+  .wx .now { display:flex; align-items:center; gap:14px; background:rgba(127,209,255,.08);
+    border:1px solid rgba(127,209,255,.2); border-radius:12px; padding:10px 14px; margin-bottom:10px; }
+  .wx .now .big { font-size:38px; }
+  .wx .now .temp { font-size:26px; font-weight:700; color:#fff; }
+  .wx .now small { display:block; color:#9fc4e8; font-size:12px; }
+  .wx .days { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
+  .wx .day { background:rgba(255,255,255,.05); border:1px solid rgba(128,180,255,.15); border-radius:10px;
+    padding:8px 4px; text-align:center; font-size:11.5px; color:#d9e8f7; }
+  .wx .day b { color:#fff; font-size:12px; }
+  .wx .day .ic { font-size:20px; margin:4px 0; }
+  .wx .day .min { color:#8fb4d8; }
+  .wx .sun { margin-top:10px; font-size:12.5px; color:#9fc4e8; text-align:center; }
+  .wx .sun b { color:#ffd76e; }
 
   .gamebox { padding:12px 14px; text-align:center; }
   .gamebox .score { display:flex; justify-content:space-between; background:rgba(127,209,255,.1); border-radius:10px; padding:8px 14px; margin-bottom:12px; font-size:13px; }
@@ -122,6 +149,7 @@
     box-shadow:0 0 0 4px rgba(255,95,95,.35); }
   .user-dot { width:18px; height:18px; border-radius:50%; background:#8b5cff; border:3px solid #fff;
     box-shadow:0 0 0 4px rgba(139,92,255,.35), 0 0 12px rgba(139,92,255,.8); }
+  .m-dot { width:10px; height:10px; border-radius:50%; background:#ff9d2e; border:2px solid #fff; }
   .st-name-tip { background:#12203a; border:1px solid #7fd1ff; color:#fff; font-weight:600; }
   @media (max-width:720px) {
     header { padding:0 8px; gap:6px; height:54px; }
@@ -135,7 +163,7 @@
     .hbtn { height:34px; min-width:34px; font-size:14px; }
     .panel { width:min(330px, 88vw); max-height:calc(100% - 66px); }
     .panel.hidden { transform:translateX(110%); }
-    .panel-tabs button { padding:12px 0; font-size:11px; }
+    .panel-tabs button { padding:12px 0; font-size:10px; }
     .leaflet-control-attribution { font-size:9px; }
   }
 </style>
@@ -149,8 +177,10 @@
       <div class="sub">пгт, райцентр Оконешниковского района, Омская область • ~6 тыс. жителей • индекс 646940</div>
     </div>
     <div class="spacer"></div>
-    <div id="weatherChip" title="Погода в посёлке сейчас">… погода</div>
+    <div id="weatherChip" title="Прогноз погоды">… погода</div>
+    <button class="hbtn" id="measureBtn" title="Измерить расстояние">📏</button>
     <button class="hbtn" id="randBtn" title="Случайное место">🎲</button>
+    <button class="hbtn" id="snowBtn" title="Снегопад ❄️">❄️</button>
     <button class="hbtn" id="shareBtn" title="Поделиться">🔗</button>
     <button class="hbtn" id="locBtn" title="Показать, где я">🎯</button>
     <div class="badge">данные OSM</div>
@@ -158,11 +188,14 @@
 
   <div style="position:relative; flex:1 1 auto; min-height:260px;">
     <div id="map"></div>
+    <div id="measureChip"></div>
+    <div id="snow"></div>
     <button class="panel-toggle" id="toggle" title="Скрыть/показать панель">◀</button>
     <div class="panel" id="panel">
       <div class="panel-tabs">
         <button class="active" data-tab="poi">📍 Места</button>
         <button data-tab="streets">🛣️ Улицы</button>
+        <button data-tab="wx">🌤 Погода</button>
         <button data-tab="game">🎯 Игра</button>
         <button data-tab="info">ℹ️ Инфо</button>
       </div>
@@ -172,6 +205,7 @@
       <div class="chips" id="chips" style="display:none"></div>
       <div class="panel-list" id="poiList"></div>
       <div class="panel-list" id="streetList" style="display:none"></div>
+      <div class="panel-list wx" id="wxBox" style="display:none"></div>
       <div class="panel-list" id="gameBox" style="display:none"></div>
       <div class="panel-list" id="infoBox" style="display:none"></div>
       <div class="panel-note">
@@ -193,6 +227,7 @@ L.control.scale({ imperial:false, position:'bottomleft' }).addTo(map);
 
 const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'&copy; OpenStreetMap contributors' });
 const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom:19, attribution:'Esri, Maxar' });
+const topo = L.tileLayer('https://tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom:17, attribution:'OpenTopoMap (CC-BY-SA)' });
 osm.addTo(map);
 
 // ---------- Граница ----------
@@ -202,7 +237,7 @@ const townPoly = L.polygon([[54.83841,75.05119],[54.84077,75.05265],[54.84015,75
 townPoly.bindTooltip('Граница пгт Оконешниково (контур застройки по данным OSM)', { sticky:true });
 townPoly.addTo(map);
 
-// ---------- Улицы с геометрией ----------
+// ---------- Улицы ----------
 const STREETS_WAYS = [
 ["Спортивная улица","residential",[[54.82974,75.08513],[54.83006,75.08386],[54.83023,75.08296],[54.83028,75.08272],[54.83027,75.08249],[54.83026,75.08215],[54.83025,75.08175],[54.83019,75.0804],[54.83017,75.07991],[54.8302,75.07963],[54.83024,75.07948],[54.83029,75.07934],[54.83038,75.07921],[54.83073,75.07864],[54.83106,75.07818],[54.83145,75.0777],[54.83155,75.07763],[54.83166,75.07761],[54.83179,75.07764],[54.83264,75.07792],[54.83274,75.07792],[54.83281,75.07786],[54.83286,75.0777],[54.83288,75.07754],[54.83307,75.07598],[54.83313,75.07533]]],
 ["Коммунистическая улица","secondary",[[54.83919,75.08911],[54.83932,75.08749],[54.8397,75.08297],[54.84005,75.07829],[54.8401,75.07745],[54.84013,75.07696],[54.84026,75.07507],[54.84043,75.07293],[54.84054,75.07139],[54.8406,75.07074],[54.84066,75.0703],[54.84068,75.07023],[54.84074,75.07],[54.84077,75.06987],[54.84088,75.06922],[54.8414,75.06594],[54.84143,75.06579],[54.84161,75.06457],[54.84162,75.06452],[54.84189,75.06322],[54.84204,75.06256],[54.84215,75.06211],[54.84231,75.0615],[54.8429,75.0596],[54.84315,75.05881],[54.84326,75.05842],[54.84335,75.05813],[54.84366,75.05711],[54.84401,75.05589]]],
@@ -250,7 +285,7 @@ function flashStreet(line, base) {
   line.setStyle({ ...base, opacity:.95, weight:(base.weight||4) + 5 });
   setTimeout(() => line.setStyle({ ...base, opacity:.55 }), 1800);
 }
-L.control.layers({ '🗺️ Схема (OSM)': osm, '🛰️ Спутник': sat },
+L.control.layers({ '🗺️ Схема (OSM)': osm, '🛰️ Спутник': sat, '⛰️ Топокарта': topo },
   { '🛣️ Названные улицы': streetLayer, '🟩 Граница посёлка': townPoly },
   { position:'topright' }).addTo(map);
 
@@ -291,10 +326,7 @@ const POI_EXTRA = [
 const POI = [ ...POI_MAIN.map(p => ({ ...p, grp:'main' })), ...POI_EXTRA.map(p => ({ ...p, grp:'shop' })) ];
 
 const SHOP_LIKE = /магазин|супермаркет|салон|пункт|аптека|электрон/;
-function chipFor(p) {
-  if (p.grp === 'main') return 'main';
-  return SHOP_LIKE.test(p.cat) || p.grp === 'shop' ? 'shop' : 'main';
-}
+function chipFor(p) { return p.grp === 'main' ? 'main' : 'shop'; }
 
 function popupHTML(p) {
   const [lat, lon] = p.pos;
@@ -310,8 +342,7 @@ function popupHTML(p) {
     </div>`;
 }
 window.copyCoords = function(lat, lon) {
-  const txt = lat + ', ' + lon;
-  if (navigator.clipboard) navigator.clipboard.writeText(txt).catch(()=>{});
+  if (navigator.clipboard) navigator.clipboard.writeText(lat + ', ' + lon).catch(()=>{});
 };
 window.shareObj = function(name) {
   const p = POI.find(x => x.name === name); if (!p) return;
@@ -332,7 +363,7 @@ POI.forEach(p => {
       iconSize:[anchor,anchor], iconAnchor:[anchor/2,anchor], popupAnchor:[0,-anchor] })
   }).addTo(map);
   m.bindPopup(() => { location.hash = 'obj=' + encodeURIComponent(p.name); return popupHTML(p); });
-  m.on('click', () => handleTap(p));
+  m.on('click', () => { if (!measuring) handleTap(p); else m.closePopup(); });
   markers.push(m);
   p._marker = m;
 });
@@ -340,7 +371,6 @@ POI.forEach(p => {
 L.marker(CENTER, { icon: L.divIcon({ className:'', html:'<div class="home-dot"></div>', iconSize:[14,14], iconAnchor:[7,7] }) })
   .bindTooltip('Центр посёлка — торговая зона').addTo(map);
 
-// Deep link: #obj=... — открыли ссылку на конкретный объект
 const hashObj = decodeURIComponent((location.hash.match(/obj=([^&]+)/) || [,''])[1]);
 const linked = POI.find(p => p.name === hashObj);
 if (linked) {
@@ -353,6 +383,7 @@ if (linked) {
 // ---------- Панель ----------
 const poiList = document.getElementById('poiList');
 const streetList = document.getElementById('streetList');
+const wxBox = document.getElementById('wxBox');
 const gameBox = document.getElementById('gameBox');
 const infoBox = document.getElementById('infoBox');
 const filterInp = document.getElementById('filter');
@@ -360,9 +391,7 @@ const searchWrap = document.getElementById('searchWrap');
 const chipsEl = document.getElementById('chips');
 
 let curChip = 'all';
-const CHIPS = [
-  ['all','📍 Все'], ['main','⭐ Главное'], ['shop','🛒 магазины'],
-];
+const CHIPS = [['all','📍 Все'], ['main','⭐ Главное'], ['shop','🛒 магазины']];
 CHIPS.forEach(([key, label]) => {
   const b = document.createElement('button');
   b.textContent = label;
@@ -393,7 +422,6 @@ function renderPOI(q = '') {
     poiList.appendChild(d);
   });
 }
-document.getElementById('sortBtn'); // placeholder (кнопка ниже в DOM добавляется динамически)
 
 function pathLength(pts) {
   let s = 0;
@@ -413,24 +441,48 @@ function renderStreets(q = '') {
       const lines = streetsByName[s[0]] || [];
       const g = L.featureGroup(lines);
       map.flyToBounds(g.getBounds(), { padding:[100,400], duration:.8, maxZoom:17 });
-      lines.forEach(l => flashStreet(l, STYLE_BY_HW[l.options.hwt] || l.options));
     };
     streetList.appendChild(d);
   });
 }
 renderPOI(); renderStreets();
 
-infoBox.innerHTML = `
-  <div class="infobox">
-    <div class="row"><div class="e">🏞️</div><div><b>Оконешниково</b> — посёлок городского типа, административный центр <b>Оконешниковского района</b> Омской области (Сибирский федеральный округ).</div></div>
-    <div class="row"><div class="e">🧭</div><div>Координаты центра: <b>54.8375° с.ш., 75.0727° в.д.</b> Расположен в юго-восточной части области, недалеко от границы с Казахстаном.</div></div>
-    <div class="row"><div class="e">👥</div><div>Население — <b>около 6 тысяч человек</b> (крупнейший населённый пункт района).</div></div>
-    <div class="row"><div class="e">📮</div><div>Почтовый индекс: <b>646940</b></div></div>
-    <div class="row"><div class="e">🛤️</div><div>Посёлок вырос вокруг железнодорожной станции, которая связывает его областным ж/д ходом с соседними районами.</div></div>
-    <div class="row"><div class="e">🏪</div><div>В центре — торговая зона: Пятёрочка, Магнит, Монетка, DNS, МТС, пункты Ozon и Wildberries.</div></div>
-    <div class="row"><div class="e">🎗️</div><div>В центре — мемориальный комплекс героям Великой Отечественной войны.</div></div>
-    <div class="row"><div class="e">🎲</div><div>Жмяк на 🎲 в шапке — сайт сам покажет случайное место (узнаёшь посёлок изнутри).</div></div>
-  </div>`;
+// ---------- Погода-вкладка ----------
+const WCODE = c => c===0?'☀️':c<3?'🌤️':c===3?'☁️':c<48?'🌫️':c<58?'🌦️':c<68?'🌧️':c<78?'🌨️':c<83?'🌧️':c<88?'🌨️':'⛈️';
+const WTEXT = c => c===0?'Ясно':c<3?'Переменная облачность':c===3?'Облачно':c<48?'Туман':c<58?'Морось':c<68?'Дождь':c<78?'Снег':c<83?'Ливни':c<88?'Снегопад':'Гроза';
+async function renderWeather() {
+  wxBox.innerHTML = '<div class="infobox">Загружаю прогноз… ⏳</div>';
+  try {
+    const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=54.8375&longitude=75.0732&current=temperature_2m,apparent_temperature,wind_speed_10m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max&forecast_days=5&timezone=auto');
+    const j = await r.json();
+    const c = j.current, dl = j.daily;
+    const wd = d => new Date(d).toLocaleDateString('ru-RU', { weekday:'short' });
+    const hm = s => s.slice(11,16);
+    let days = '';
+    for (let i = 0; i < dl.time.length; i++) {
+      days += `<div class="day">
+        <b>${i === 0 ? 'Сегодня' : wd(dl.time[i])}</b>
+        <div class="ic">${WCODE(dl.weather_code[i])}</div>
+        <div>${Math.round(dl.temperature_2m_max[i])}° / <span class="min">${Math.round(dl.temperature_2m_min[i])}°</span></div>
+        <div class="min">💧${dl.precipitation_probability_max[i] ?? 0}%</div>
+      </div>`;
+    }
+    wxBox.innerHTML = `
+      <div class="now">
+        <div class="big">${WCODE(c.weather_code)}</div>
+        <div>
+          <div class="temp">${Math.round(c.temperature_2m)}°C</div>
+          <small>${WTEXT(c.weather_code)} • ощущается ${Math.round(c.apparent_temperature)}°</small>
+          <small>ветер ${Math.round(c.wind_speed_10m)} м/с</small>
+        </div>
+      </div>
+      <div class="days">${days}</div>
+      <div class="sun">☀️ восход <b>${hm(dl.sunrise[0])}</b> • закат <b>${hm(dl.sunset[0])}</b> — долгота дня <b>${fmtM((new Date(dl.sunset[0]) - new Date(dl.sunrise[0])) / 1000)}</b></div>
+      <div class="panel-note">Источник: Open-Meteo (ECMWF), часовой пояс местный (Asia/Omsk). Обновляется при каждом открытии вкладки.</div>`;
+  } catch (e) {
+    wxBox.innerHTML = '<div class="infobox">Не удалось загрузить погоду 😔<br><small>Проверь интернет. Карта при этом работает офлайн.</small></div>';
+  }
+}
 
 // ---------- Игра ----------
 const game = { on:false, target:null, score:0, best:+(localStorage.getItem('okn_best')||0), misses:0 };
@@ -482,23 +534,61 @@ function handleTap(p) {
 }
 function fmtM(m) { return m >= 1000 ? (m/1000).toFixed(1) + ' км' : Math.round(m) + ' м'; }
 
-// ---------- Погода ----------
-const WCODE = c => c===0?'☀️':c<3?'🌤️':c===3?'☁️':c<48?'🌫️':c<58?'🌦️':c<68?'🌧️':c<78?'🌨️':c<83?'🌧️':c<88?'🌨️':'⛈️';
-(async () => {
-  try {
-    const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=54.8375&longitude=75.0732&current=temperature_2m,wind_speed_10m,weather_code&timezone=auto');
-    const j = await r.json();
-    const c = j.current;
-    document.getElementById('weatherChip').innerHTML =
-      `<span style="font-size:18px">${WCODE(c.weather_code)}</span>
-       <span class="t">${Math.round(c.temperature_2m)}°C</span>
-       <span class="d">ветер ${Math.round(c.wind_speed_10m)} м/с</span>`;
-  } catch (e) { document.getElementById('weatherChip').innerHTML = '<span class="d">погода недоступна</span>'; }
-})();
+// ---------- Инфо ----------
+const visits = +(localStorage.getItem('okn_visits') || 0) + 1;
+localStorage.setItem('okn_visits', visits);
+infoBox.innerHTML = `
+  <div class="infobox">
+    <div class="row"><div class="e">👋</div><div>Ты здесь <b>${visits % 10 === 1 && visits % 100 !== 11 ? 'впервые' : 'уже в ' + visits + '-й раз'}</b> — приятно!</div></div>
+    <div class="row"><div class="e">🏞️</div><div><b>Оконешниково</b> — посёлок городского типа, административный центр <b>Оконешниковского района</b> Омской области.</div></div>
+    <div class="row"><div class="e">🧭</div><div>Координаты центра: <b>54.8375° с.ш., 75.0727° в.д.</b> Юго-восток области, недалеко от границы с Казахстаном.</div></div>
+    <div class="row"><div class="e">👥</div><div>Население — <b>около 6 тысяч человек</b>. Индекс: <b>646940</b>.</div></div>
+    <div class="row"><div class="e">🛤️</div><div>Посёлок вырос вокруг железнодорожной станции на магистрали Омск — Карасук.</div></div>
+    <div class="row"><div class="e">🚗</div><div><a target="_blank" rel="noopener" href="https://yandex.ru/maps/?rtext=54.9885,73.3242~54.83746,75.0732">Маршрут из Омска (яндекс.карт-ы)</a></div></div>
+    <div class="row"><div class="e">🏟️</div><div>В центре — торговая зона (Пятёрочка, Магнит, DNS, Ozon/WB) и мемориальный комплекс героям ВОВ.</div></div>
+    <div class="row"><div class="e">📏</div><div>Кнопка 📏 в шапке — режим линейки: кликай точки на карте и узнавай расстояние.</div></div>
+  </div>`;
+
+// ---------- Измеритель расстояний ----------
+let measuring = false;
+const measurePts = [];
+let measureLine = null, measureNodes = null;
+const measureChip = document.getElementById('measureChip');
+const measureBtn = document.getElementById('measureBtn');
+function measureTotal() {
+  let s = 0;
+  for (let i = 1; i < measurePts.length; i++) s += map.distance(L.latLng(measurePts[i-1]), L.latLng(measurePts[i]));
+  return s;
+}
+function redrawMeasure() {
+  const g = document.getElementById('map');
+  g.classList.toggle('measure-mode', measuring);
+  if (measureNodes) map.removeLayer(measureNodes);
+  if (measureLine) map.removeLayer(measureLine);
+  measureNodes = L.layerGroup(measurePts.map(pt =>
+    L.marker(pt, { icon: L.divIcon({ className:'', html:'<div class="m-dot"></div>', iconSize:[10,10], iconAnchor:[5,5] }) }))
+  ).addTo(map);
+  if (measurePts.length > 1) measureLine = L.polyline(measurePts, { color:'#ff9d2e', weight:3, dashArray:'6 4' }).addTo(map);
+  if (measurePts.length) {
+    measureChip.style.display = 'block';
+    measureChip.innerHTML = measurePts.length > 1 ? '📏 ' + fmtM(measureTotal()) : 'Кликай точки на карте…';
+  } else measureChip.style.display = 'none';
+}
+map.on('click', e => {
+  if (!measuring) return;
+  measurePts.push([e.latlng.lat, e.latlng.lng]);
+  redrawMeasure();
+});
+measureBtn.onclick = () => {
+  measuring = !measuring;
+  measureBtn.classList.toggle('on', measuring);
+  if (measuring) { measureChip.style.display = 'block'; measureChip.textContent = 'Кликай точки на карте…'; }
+  else { measurePts.length = 0; redrawMeasure(); measureChip.style.display = 'none'; }
+};
 
 // ---------- Геолокация ----------
 let userMarker = null, userCircle = null;
-function findUser(beforeFly) {
+function findUser() {
   if (!navigator.geolocation) { alert('Геолокация не поддерживается'); return; }
   navigator.geolocation.getCurrentPosition(pos => {
     const ll = [pos.coords.latitude, pos.coords.longitude];
@@ -514,17 +604,16 @@ function findUser(beforeFly) {
       <div class="pop-cat">точность ±${Math.round(pos.coords.accuracy||30)} м</div>
       <div class="pop-cat">Ближайший объект: ${nearest.ico} ${nearest.name} — ${fmtM(nd)}</div>
       <div class="pop-actions"><a target="_blank" rel="noopener" href="https://yandex.ru/maps/?rtext=~${ll[0]},${ll[1]}~${nearest.pos[0]},${nearest.pos[1]}">🚗 маршрут</a></div>`);
-    renderPOI(filterInp.value.trim()); // перерисовать с расстояниями
-    beforeFly && beforeFly();
+    renderPOI(filterInp.value.trim());
   }, () => alert('Не удалось получить местоположение. Проверь разрешения браузера.'), { enableHighAccuracy:true });
 }
-document.getElementById('locBtn').onclick = () => findUser();
+document.getElementById('locBtn').onclick = findUser;
 
 // Сортировка по расстоянию
 const sortBtn = document.createElement('button');
 sortBtn.id = 'sortBtn';
 sortBtn.textContent = '📏 Показать объекты по расстоянию от меня';
-sortBtn.onclick = () => { if (!userPos) findUser(); else { sortBtn.textContent='📏 Уже отсортировано ✓'; setTimeout(()=>sortBtn.textContent='📏 Показать объекты по расстоянию от меня', 1500); } };
+sortBtn.onclick = () => { if (!userPos) findUser(); else { sortBtn.textContent = '📏 Уже отсортировано ✓'; setTimeout(() => sortBtn.textContent = '📏 Показать объекты по расстоянию от меня', 1500); } };
 filterInp.parentElement.parentElement.insertBefore(sortBtn, filterInp.parentElement.parentElement.querySelector('.chips'));
 
 // ---------- Случайное место ----------
@@ -534,30 +623,51 @@ document.getElementById('randBtn').onclick = () => {
   setTimeout(() => p._marker.openPopup(), 1100);
 };
 
+// ---------- Снегопад ❄️ ----------
+const snowEl = document.getElementById('snow');
+function buildSnow() {
+  snowEl.innerHTML = '';
+  for (let i = 0; i < 45; i++) {
+    const f = document.createElement('div');
+    f.textContent = ['❄','❅','❆','•'][Math.floor(Math.random()*4)];
+    f.style.left = Math.random()*100 + 'vw';
+    f.style.fontSize = (8 + Math.random()*14) + 'px';
+    f.style.animationDuration = (6 + Math.random()*14) + 's';
+    f.style.animationDelay = (-Math.random()*20) + 's';
+    snowEl.appendChild(f);
+  }
+}
+buildSnow();
+document.getElementById('snowBtn').onclick = () => {
+  const on = snowEl.classList.toggle('on');
+  document.getElementById('snowBtn').classList.toggle('on', on);
+  localStorage.setItem('okn_snow', on ? '1' : '0');
+};
+if (localStorage.getItem('okn_snow') === '1') { snowEl.classList.add('on'); document.getElementById('snowBtn').classList.add('on'); }
+
 // ---------- Поделиться ----------
 document.getElementById('shareBtn').onclick = async () => {
-  const data = { title:'Карта пгт Оконешниково', text:'Интерактивная карта посёлка Оконешниково: улицы, дома, достопримечательности', url: location.href };
+  const data = { title:'Карта пгт Оконешниково', text:'Интерактивная карта посёлка Оконешниково: улицы, дома, достопримечательности', url: location.href.split('#')[0] };
   if (navigator.share) { try { await navigator.share(data); } catch(e){} }
-  else { navigator.clipboard?.writeText(location.href); alert(location.href); }
+  else { navigator.clipboard?.writeText(SITE_URL); alert(SITE_URL); }
 };
 
 // ---------- Табы ----------
-const tabs = { poi:poiList, streets:streetList, game:gameBox, info:infoBox };
-document.querySelectorAll('.panel-tabs button').forEach(b => {
-  b.onclick = () => {
-    document.querySelectorAll('.panel-tabs button').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    const t = b.dataset.tab;
-    Object.entries(tabs).forEach(([k, el]) => el.style.display = k === t ? '' : 'none');
-    chipsEl.style.display = t === 'poi' ? 'flex' : 'none';
-    sortBtn.style.display = t === 'poi' ? '' : 'none';
-    searchWrap.style.display = (t === 'game' || t === 'info') ? 'none' : '';
-    filterInp.value = ''; curChip = 'all';
-    chipsEl.querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.chip === 'all'));
-    renderPOI(); renderStreets();
-    if (t === 'game') renderGame();
-  };
-});
+const tabs = { poi:poiList, streets:streetList, wx:wxBox, game:gameBox, info:infoBox };
+function activateTab(t) {
+  document.querySelectorAll('.panel-tabs button').forEach(x => x.classList.toggle('active', x.dataset.tab === t));
+  Object.entries(tabs).forEach(([k, el]) => el.style.display = k === t ? '' : 'none');
+  chipsEl.style.display = t === 'poi' ? 'flex' : 'none';
+  sortBtn.style.display = t === 'poi' ? '' : 'none';
+  searchWrap.style.display = (t === 'game' || t === 'info' || t === 'wx') ? 'none' : '';
+  filterInp.value = ''; curChip = 'all';
+  chipsEl.querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.chip === 'all'));
+  renderPOI(); renderStreets();
+  if (t === 'game') renderGame();
+  if (t === 'wx') renderWeather();
+}
+document.querySelectorAll('.panel-tabs button').forEach(b => b.onclick = () => activateTab(b.dataset.tab));
+document.getElementById('weatherChip').onclick = () => { activateTab('wx'); panel.classList.remove('hidden'); syncToggle(); };
 filterInp.addEventListener('input', () => {
   const q = filterInp.value.trim();
   const active = document.querySelector('.panel-tabs button.active')?.dataset.tab;
@@ -568,7 +678,7 @@ filterInp.addEventListener('input', () => {
 // ---------- PWA ----------
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
 
-// ---------- Раскладка ----------
+// ---------- раскладка ----------
 const toggle = document.getElementById('toggle');
 const panel = document.getElementById('panel');
 function syncToggle() {
