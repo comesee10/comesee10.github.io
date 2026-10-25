@@ -30,14 +30,12 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">
 <style>
-  :root {
-    --bg1:#1b2a3d; --bg2:#12203a; --accent:#7fd1ff; --panel:rgba(16,28,48,.93);
-  }
+  :root { --bg1:#1b2a3d; --bg2:#12203a; --accent:#7fd1ff; --panel:rgba(16,28,48,.93); }
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body { height:100%; font-family:"Segoe UI", Arial, sans-serif; }
   .app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
   header {
-    height:58px; flex:0 0 auto; display:flex; align-items:center; gap:12px; padding:0 18px;
+    height:58px; flex:0 0 auto; display:flex; align-items:center; gap:10px; padding:0 18px;
     background:linear-gradient(90deg, var(--bg1), var(--bg2)); color:#eaf4ff;
     box-shadow:0 2px 10px rgba(0,0,0,.35); z-index:1200;
   }
@@ -45,57 +43,51 @@
   header h1 { font-size:19px; font-weight:600; letter-spacing:.4px; }
   header .sub { font-size:12px; color:#9fc4e8; }
   header .spacer { flex:1; }
-  header .badge {
-    font-size:11.5px; color:#ffe9a8; background:rgba(255,220,120,.12);
-    border:1px solid rgba(255,220,120,.35); border-radius:20px; padding:4px 12px;
-  }
-  #weatherChip {
-    display:flex; align-items:center; gap:8px; font-size:13px; color:#fff;
+  header .badge { font-size:11.5px; color:#ffe9a8; background:rgba(255,220,120,.12);
+    border:1px solid rgba(255,220,120,.35); border-radius:20px; padding:4px 12px; }
+  #weatherChip { display:flex; align-items:center; gap:8px; font-size:13px; color:#fff;
     background:rgba(127,209,255,.12); border:1px solid rgba(127,209,255,.35);
-    border-radius:20px; padding:5px 14px; white-space:nowrap; cursor:default;
-  }
+    border-radius:20px; padding:5px 14px; white-space:nowrap; cursor:default; }
   #weatherChip .t { font-weight:700; font-size:15px; }
   #weatherChip .d { color:#9fc4e8; font-size:11px; }
-  #shareBtn,#locBtn {
-    height:38px; min-width:38px; border:none; cursor:pointer;
+  .hbtn { height:38px; min-width:38px; border:none; cursor:pointer;
     background:rgba(127,209,255,.12); color:#cfe6ff; font-size:17px;
-    border:1px solid rgba(127,209,255,.3); border-radius:12px;
-  }
-  #shareBtn:hover,#locBtn:hover { background:rgba(127,209,255,.25); }
+    border:1px solid rgba(127,209,255,.3); border-radius:12px; }
+  .hbtn:hover { background:rgba(127,209,255,.25); }
   #map { position:absolute; top:0; left:0; right:0; bottom:0; }
 
-  .panel {
-    position:absolute; top:14px; right:0; width:330px; max-height:calc(100% - 28px);
+  .panel { position:absolute; top:14px; right:0; width:330px; max-height:calc(100% - 28px);
     background:var(--panel); backdrop-filter:blur(6px); border-radius:12px 0 0 12px;
     border:1px solid rgba(128,180,255,.25); border-right:none; z-index:1000;
-    display:flex; flex-direction:column; color:#e8f1fb; transition:transform .25s;
-  }
+    display:flex; flex-direction:column; color:#e8f1fb; transition:transform .25s; }
   .panel.hidden { transform:translateX(110%); }
-  .panel-toggle {
-    position:absolute; top:14px; right:0; z-index:1001; margin-top:10px;
+  .panel-toggle { position:absolute; top:14px; right:0; z-index:1001; margin-top:10px;
     height:34px; width:34px; padding:0; border:none; border-radius:8px 0 0 8px;
     background:var(--panel); color:#cfe6ff; font-size:16px; cursor:pointer;
-    border:1px solid rgba(128,180,255,.25); border-right:none;
-  }
+    border:1px solid rgba(128,180,255,.25); border-right:none; }
   .panel-tabs { display:flex; border-bottom:1px solid rgba(128,180,255,.25); }
-  .panel-tabs button {
-    flex:1; padding:10px 0; background:transparent; color:#8fb4d8; border:none;
-    font-size:13px; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap;
-  }
+  .panel-tabs button { flex:1; padding:10px 0; background:transparent; color:#8fb4d8; border:none;
+    font-size:13px; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; }
   .panel-tabs button.active { color:#fff; border-bottom-color:var(--accent); }
-  .panel-search { padding:10px 12px; }
-  .panel-search input {
-    width:100%; padding:7px 10px; border-radius:8px; border:1px solid rgba(128,180,255,.3);
-    background:rgba(255,255,255,.07); color:#fff; font-size:13px; outline:none;
-  }
+  .panel-search { padding:8px 12px 6px; }
+  .panel-search input { width:100%; padding:7px 10px; border-radius:8px; border:1px solid rgba(128,180,255,.3);
+    background:rgba(255,255,255,.07); color:#fff; font-size:13px; outline:none; }
+  .chips { display:flex; gap:6px; padding:0 12px 8px; overflow-x:auto; }
+  .chips button { flex:0 0 auto; padding:5px 12px; font-size:12px; border-radius:14px; cursor:pointer;
+    border:1px solid rgba(128,180,255,.3); background:rgba(255,255,255,.05); color:#a8c8e8; }
+  .chips button.on { background:rgba(127,209,255,.25); color:#fff; border-color:var(--accent); }
+  #sortBtn { margin:0 12px 4px; padding:5px 10px; font-size:12px; color:#cfe6ff; cursor:pointer;
+    background:rgba(139,92,255,.15); border:1px solid rgba(139,92,255,.35); border-radius:8px; }
+  #sortBtn:hover { background:rgba(139,92,255,.3); }
   .panel-list { overflow-y:auto; padding:4px 8px 14px; flex:1; }
   .item { display:flex; align-items:center; gap:10px; padding:8px; border-radius:8px; cursor:pointer; }
   .item:hover { background:rgba(120,190,255,.14); }
   .item .ico { width:28px; height:28px; flex:0 0 28px; display:flex; align-items:center; justify-content:center;
     background:rgba(127,209,255,.15); border-radius:8px; font-size:15px; }
   .item.secondary .ico { background:rgba(255,255,255,.08); }
-  .item .t { font-size:13px; line-height:1.3; }
+  .item .t { font-size:13px; line-height:1.3; flex:1; }
   .item .t small { display:block; color:#8fb4d8; font-size:11px; }
+  .item .dist { font-size:11px; color:#ffd76e; }
   .street { padding:6px 10px; font-size:13px; border-radius:7px; cursor:pointer; display:flex; justify-content:space-between; color:#d9e8f7; }
   .street:hover { background:rgba(120,190,255,.14); }
   .street small { color:#7ea6cf; }
@@ -111,36 +103,28 @@
   .gamebox .score b { color:#ffd76e; font-size:16px; }
   .gamebox .quest { font-size:14.5px; line-height:1.5; min-height:44px; margin-bottom:12px; }
   .gamebox .quest b { color:#7fd1ff; font-size:16px; }
-  .gamebox .bigbtn {
-    width:100%; padding:10px 0; font-size:14px; font-weight:600; color:#0e2033;
-    background:linear-gradient(90deg,#7fd1ff,#57c17a); border:none; border-radius:10px; cursor:pointer; margin-top:8px;
-  }
+  .gamebox .bigbtn { width:100%; padding:10px 0; font-size:14px; font-weight:600; color:#0e2033;
+    background:linear-gradient(90deg,#7fd1ff,#57c17a); border:none; border-radius:10px; cursor:pointer; margin-top:8px; }
   .gamebox .bigbtn.gray { background:rgba(255,255,255,.15); color:#cfe6ff; }
-  .gamebox .res { font-size:14px; margin:10px 0; line-height:1.5; color:#ffe9a8; }
   .game.flash-good { animation:good .8s; } .game.flash-bad { animation:bad .8s; }
-  @keyframes good { 0%,100%{background:transparent} 40%{background:rgba(87,193,122,.25)} }
-  @keyframes bad  { 0%,100%{background:transparent} 40%{background:rgba(255,90,90,.25)} }
+  @keyframes good { 0%,100%{background:transparent} 40%{background:rgba(87,193,122,.3)} }
+  @keyframes bad  { 0%,100%{background:transparent} 40%{background:rgba(255,90,90,.3)} }
 
   .leaflet-popup-content-wrapper { border-radius:10px; }
   .pop-title { font-weight:700; font-size:14px; margin-bottom:3px; }
   .pop-cat { font-size:12px; color:#557; }
-  .pop-actions { margin-top:8px; display:flex; gap:8px; align-items:center; font-size:12px; flex-wrap:wrap; }
-  .pop-actions a, .pop-actions button {
-    font-size:12px; text-decoration:none; color:#1b6dc0; background:rgba(27,109,192,.08);
-    border:1px solid rgba(27,109,192,.3); border-radius:7px; padding:3px 9px; cursor:pointer;
-  }
-  .pop-actions button:hover, .pop-actions a:hover { background:rgba(27,109,192,.16); }
+  .pop-actions { margin-top:8px; display:flex; gap:6px; align-items:center; font-size:12px; flex-wrap:wrap; }
+  .pop-actions a, .pop-actions button { font-size:12px; text-decoration:none; color:#1b6dc0; background:rgba(27,109,192,.08);
+    border:1px solid rgba(27,109,192,.3); border-radius:7px; padding:3px 9px; cursor:pointer; }
+  .pop-actions a:hover, .pop-actions button:hover { background:rgba(27,109,192,.16); }
   .coords { font-size:11px; color:#77a; font-family:Consolas, monospace; }
-  .home-dot {
-    width:14px; height:14px; border-radius:50%; background:#ff5f5f; border:3px solid #fff;
-    box-shadow:0 0 0 4px rgba(255,95,95,.35);
-  }
-  .user-dot {
-    width:18px; height:18px; border-radius:50%; background:#8b5cff; border:3px solid #fff;
-    box-shadow:0 0 0 1000px translucent, 0 0 0 4px rgba(139,92,255,.35), 0 0 12px rgba(139,92,255,.8);
-  }
+  .home-dot { width:14px; height:14px; border-radius:50%; background:#ff5f5f; border:3px solid #fff;
+    box-shadow:0 0 0 4px rgba(255,95,95,.35); }
+  .user-dot { width:18px; height:18px; border-radius:50%; background:#8b5cff; border:3px solid #fff;
+    box-shadow:0 0 0 4px rgba(139,92,255,.35), 0 0 12px rgba(139,92,255,.8); }
+  .st-name-tip { background:#12203a; border:1px solid #7fd1ff; color:#fff; font-weight:600; }
   @media (max-width:720px) {
-    header { padding:0 10px; gap:8px; height:54px; }
+    header { padding:0 8px; gap:6px; height:54px; }
     header .logo { font-size:22px; }
     header h1 { font-size:15px; }
     header .sub { display:none; }
@@ -148,7 +132,7 @@
     #weatherChip { padding:4px 8px; font-size:11px; gap:5px; }
     #weatherChip .t { font-size:13px; }
     #weatherChip .d { font-size:9px; }
-    #shareBtn,#locBtn { height:34px; min-width:34px; font-size:14px; }
+    .hbtn { height:34px; min-width:34px; font-size:14px; }
     .panel { width:min(330px, 88vw); max-height:calc(100% - 66px); }
     .panel.hidden { transform:translateX(110%); }
     .panel-tabs button { padding:12px 0; font-size:11px; }
@@ -165,9 +149,10 @@
       <div class="sub">пгт, райцентр Оконешниковского района, Омская область • ~6 тыс. жителей • индекс 646940</div>
     </div>
     <div class="spacer"></div>
-    <div id="weatherChip" title="Погода в посёлке сейчас (Open-Meteo)">… погода</div>
-    <button id="shareBtn" title="Поделиться">🔗</button>
-    <button id="locBtn" title="Показать, где я">🎯</button>
+    <div id="weatherChip" title="Погода в посёлке сейчас">… погода</div>
+    <button class="hbtn" id="randBtn" title="Случайное место">🎲</button>
+    <button class="hbtn" id="shareBtn" title="Поделиться">🔗</button>
+    <button class="hbtn" id="locBtn" title="Показать, где я">🎯</button>
     <div class="badge">данные OSM</div>
   </header>
 
@@ -184,13 +169,14 @@
       <div class="panel-search" id="searchWrap">
         <input id="filter" type="text" placeholder="Поиск по названию…">
       </div>
+      <div class="chips" id="chips" style="display:none"></div>
       <div class="panel-list" id="poiList"></div>
       <div class="panel-list" id="streetList" style="display:none"></div>
       <div class="panel-list" id="gameBox" style="display:none"></div>
       <div class="panel-list" id="infoBox" style="display:none"></div>
       <div class="panel-note">
-        Улицы и дома — с подложки OpenStreetMap. OSM-данные по посёлку неполные:
-        названы не все улицы, поэтому часть мелких проездов может отсутствовать.
+        Синие линии — реально существующие улицы (данные OSM), кликни на них или в списке.
+        OSM-данные по посёлку неполные: часть мелких проездов может отсутствовать.
       </div>
     </div>
   </div>
@@ -199,6 +185,7 @@
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 <script>
 const CENTER = [54.83746, 75.07320];
+const SITE_URL = 'https://comesee10.github.io/';
 
 const map = L.map('map', { zoomControl:false }).setView(CENTER, 14);
 L.control.zoom({ position:'bottomleft' }).addTo(map);
@@ -207,15 +194,67 @@ L.control.scale({ imperial:false, position:'bottomleft' }).addTo(map);
 const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'&copy; OpenStreetMap contributors' });
 const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom:19, attribution:'Esri, Maxar' });
 osm.addTo(map);
-L.control.layers({ '🗺️ Схема (OSM)': osm, '🛰️ Спутник': sat }, null, { position:'topright' }).addTo(map);
 
-// Граница посёлка (OSM way 130639198)
+// ---------- Граница ----------
 const townPoly = L.polygon([[54.83841,75.05119],[54.84077,75.05265],[54.84015,75.05483],[54.84038,75.05518],[54.84092,75.05601],[54.84317,75.05784],[54.84331,75.05794],[54.84332,75.0579],[54.84335,75.05782],[54.8434,75.05764],[54.84348,75.05738],[54.84355,75.05713],[54.844,75.05564],[54.84419,75.05597],[54.84446,75.05632],[54.84437,75.05701],[54.84418,75.05754],[54.84517,75.05821],[54.84507,75.05866],[54.84738,75.06015],[54.8468,75.06295],[54.84709,75.06319],[54.84684,75.06405],[54.84658,75.0639],[54.84597,75.06666],[54.84565,75.06725],[54.84601,75.06797],[54.8472,75.06906],[54.85039,75.07534],[54.8518,75.07694],[54.85135,75.07934],[54.85174,75.0822],[54.85362,75.08482],[54.85374,75.08762],[54.85211,75.09166],[54.84581,75.0834],[54.84555,75.08308],[54.84377,75.08083],[54.84186,75.08474],[54.84208,75.08687],[54.84064,75.08883],[54.8403,75.09419],[54.83812,75.10151],[54.83623,75.11214],[54.83179,75.11],[54.82898,75.10966],[54.82825,75.10963],[54.82823,75.1024],[54.82749,75.10035],[54.82707,75.09418],[54.8265,75.08571],[54.82537,75.08278],[54.8249,75.08155],[54.82514,75.08111],[54.82494,75.08083],[54.8252,75.08034],[54.825,75.07997],[54.8259,75.07813],[54.82534,75.07733],[54.82545,75.07717],[54.82533,75.07698],[54.82528,75.07712],[54.82521,75.07703],[54.82529,75.0768],[54.82501,75.07645],[54.82517,75.07603],[54.82513,75.07596],[54.82532,75.07556],[54.82552,75.07517],[54.8259,75.07456],[54.82656,75.07437],[54.83143,75.07295],[54.83316,75.07351],[54.83311,75.07202],[54.833,75.07185],[54.83336,75.07167],[54.83328,75.07113],[54.83334,75.06992],[54.83449,75.07004],[54.83449,75.07036],[54.83465,75.07036],[54.83465,75.07057],[54.83557,75.0706],[54.83524,75.06623],[54.83526,75.0657],[54.83531,75.06481],[54.83523,75.06444],[54.83485,75.06444],[54.8348,75.06409],[54.83459,75.06406],[54.83449,75.06404],[54.83429,75.06383],[54.83438,75.06323],[54.8343,75.06239],[54.83441,75.06227],[54.83436,75.06168],[54.83433,75.06139],[54.8343,75.06108],[54.8345,75.0602],[54.83431,75.05921],[54.83429,75.05912],[54.83402,75.05815],[54.83387,75.05789],[54.83362,75.05696],[54.83363,75.05658],[54.83308,75.05441],[54.83367,75.05385],[54.83446,75.05309],[54.8347,75.05297],[54.83628,75.05222]], {
   color:'#57c17a', weight:2.5, dashArray:'7 6', fill:true, fillColor:'#57c17a', fillOpacity:0.05
-}).addTo(map);
+});
 townPoly.bindTooltip('Граница пгт Оконешниково (контур застройки по данным OSM)', { sticky:true });
+townPoly.addTo(map);
 
-// Главные объекты
+// ---------- Улицы с геометрией ----------
+const STREETS_WAYS = [
+["Спортивная улица","residential",[[54.82974,75.08513],[54.83006,75.08386],[54.83023,75.08296],[54.83028,75.08272],[54.83027,75.08249],[54.83026,75.08215],[54.83025,75.08175],[54.83019,75.0804],[54.83017,75.07991],[54.8302,75.07963],[54.83024,75.07948],[54.83029,75.07934],[54.83038,75.07921],[54.83073,75.07864],[54.83106,75.07818],[54.83145,75.0777],[54.83155,75.07763],[54.83166,75.07761],[54.83179,75.07764],[54.83264,75.07792],[54.83274,75.07792],[54.83281,75.07786],[54.83286,75.0777],[54.83288,75.07754],[54.83307,75.07598],[54.83313,75.07533]]],
+["Коммунистическая улица","secondary",[[54.83919,75.08911],[54.83932,75.08749],[54.8397,75.08297],[54.84005,75.07829],[54.8401,75.07745],[54.84013,75.07696],[54.84026,75.07507],[54.84043,75.07293],[54.84054,75.07139],[54.8406,75.07074],[54.84066,75.0703],[54.84068,75.07023],[54.84074,75.07],[54.84077,75.06987],[54.84088,75.06922],[54.8414,75.06594],[54.84143,75.06579],[54.84161,75.06457],[54.84162,75.06452],[54.84189,75.06322],[54.84204,75.06256],[54.84215,75.06211],[54.84231,75.0615],[54.8429,75.0596],[54.84315,75.05881],[54.84326,75.05842],[54.84335,75.05813],[54.84366,75.05711],[54.84401,75.05589]]],
+["улица Кирова","secondary",[[54.85374,75.08994],[54.853,75.08901],[54.85269,75.08862],[54.85209,75.08781],[54.85151,75.08696],[54.85029,75.08529],[54.84955,75.08426],[54.84944,75.08412],[54.84706,75.08093],[54.84574,75.07912],[54.84466,75.07771],[54.84354,75.07624],[54.84289,75.07531],[54.84246,75.07475],[54.84191,75.07397],[54.84178,75.07381],[54.84161,75.07368],[54.84116,75.07337],[54.84043,75.07293]]],
+["Советская улица","residential",[[54.83223,75.1084],[54.83248,75.10759],[54.83346,75.10432],[54.83436,75.10139],[54.835,75.0992],[54.83503,75.09909],[54.83521,75.0984],[54.83569,75.09598],[54.83617,75.09373],[54.83631,75.09271],[54.83636,75.09202],[54.83636,75.09153],[54.83634,75.09109],[54.83632,75.09063],[54.8363,75.09041],[54.83625,75.09024],[54.83623,75.09014],[54.83622,75.08989],[54.83621,75.08922],[54.83621,75.08888],[54.83621,75.08833]]],
+["Школьная улица","residential",[[54.83911,75.09041],[54.83834,75.09035],[54.83778,75.09028],[54.8376,75.09025],[54.83698,75.09024],[54.83653,75.09025],[54.83625,75.09024],[54.83617,75.09024],[54.83553,75.09031],[54.83544,75.09032],[54.83439,75.09041],[54.83359,75.0905],[54.83332,75.09055],[54.83144,75.09097],[54.82983,75.09106],[54.82969,75.09109],[54.82958,75.09113],[54.8276,75.09114],[54.82722,75.09116],[54.82713,75.09119]]],
+["Степная улица","residential",[[54.83576,75.07193],[54.83573,75.07146],[54.8357,75.07129],[54.83568,75.07117],[54.83564,75.07093],[54.83562,75.07059],[54.83565,75.0694],[54.83571,75.06791],[54.83572,75.06753],[54.8358,75.0657],[54.83579,75.06472],[54.83583,75.06387],[54.83593,75.06139]]],
+["дорога Оконешниково — Стрельниково","unclassified",[[54.82565,75.07822],[54.82547,75.07795],[54.82538,75.07779],[54.82533,75.0777],[54.82461,75.07658],[54.8242,75.07595],[54.82376,75.07523],[54.8231,75.0742],[54.8229,75.0739],[54.82275,75.07364],[54.82256,75.07326],[54.82208,75.07219],[54.82002,75.06759],[54.81842,75.06403],[54.81671,75.0603],[54.81509,75.05671],[54.81427,75.05494],[54.81327,75.05273],[54.81236,75.05075],[54.81221,75.05043],[54.81207,75.05018],[54.81195,75.05001],[54.8118,75.04984],[54.81149,75.04954],[54.81066,75.04878],[54.80978,75.04799],[54.8077,75.04613],[54.80665,75.04519],[54.80565,75.04428],[54.8049,75.0436],[54.80315,75.04202],[54.80215,75.0411],[54.80109,75.04015],[54.80038,75.0395],[54.79985,75.03898],[54.79937,75.03854],[54.79838,75.0375],[54.79747,75.03659],[54.79511,75.03412],[54.7939,75.03287],[54.79337,75.03235],[54.7928,75.03181],[54.79168,75.03073],[54.79056,75.02966],[54.79013,75.02928],[54.78976,75.02895],[54.78943,75.02865],[54.78908,75.02838],[54.78883,75.0282],[54.78844,75.028],[54.78718,75.02745],[54.7849,75.02644],[54.78358,75.02584],[54.78264,75.02544],[54.78161,75.02498],[54.78052,75.02451],[54.77926,75.02394],[54.7789,75.0238],[54.7786,75.02369],[54.77831,75.02361],[54.77782,75.02349],[54.77728,75.02339],[54.77716,75.02335],[54.77704,75.02329],[54.7769,75.02316],[54.77673,75.02296],[54.7765,75.02264],[54.77614,75.02206],[54.77572,75.02145],[54.77523,75.02071],[54.77497,75.02035],[54.77476,75.02011],[54.77417,75.01951],[54.77331,75.01861],[54.77262,75.0179],[54.77211,75.01736],[54.77155,75.01683],[54.77101,75.01636],[54.7704,75.01591],[54.76903,75.01494],[54.76771,75.01403],[54.76705,75.01357],[54.76597,75.0128],[54.76485,75.01201],[54.7645,75.01178],[54.76417,75.01157],[54.76344,75.01123],[54.76311,75.01108],[54.76286,75.01093],[54.76269,75.01077],[54.76244,75.01047],[54.7614,75.00918],[54.75981,75.00711],[54.75878,75.00581],[54.75758,75.00429],[54.75566,75.00189],[54.75456,75.0005],[54.75373,74.99943],[54.75314,74.99871],[54.75272,74.99817],[54.7525,74.99782],[54.75232,74.99745],[54.75201,74.99669],[54.75172,74.99604],[54.75154,74.99561],[54.75137,74.99518]]],
+["улица Ленина","residential",[[54.82974,75.10506],[54.82976,75.10484],[54.8298,75.10454],[54.82985,75.10393],[54.82985,75.10317],[54.82975,75.10023],[54.82975,75.10009],[54.82968,75.09745],[54.82962,75.09394],[54.82961,75.09383],[54.82958,75.09113],[54.82949,75.08778],[54.82949,75.08748],[54.82951,75.08725],[54.82954,75.08708],[54.82964,75.0867],[54.83003,75.08543]]],
+["Лесная улица","residential",[[54.8276,75.09114],[54.82758,75.08773],[54.82759,75.0869]]],
+["Омская улица","residential",[[54.83747,75.05931],[54.84029,75.06002]]],
+["Степная улица","residential",[[54.83384,75.08759],[54.83425,75.08507],[54.83455,75.08316],[54.83461,75.08291],[54.83469,75.08271],[54.83477,75.08258],[54.83481,75.08253],[54.83494,75.0824],[54.8352,75.08216],[54.83527,75.08204],[54.83532,75.08187],[54.83543,75.08096],[54.83594,75.07684]]],
+["улица Маяковского","residential",[[54.83437,75.09302],[54.83326,75.09321],[54.83259,75.09335],[54.83156,75.09358],[54.82962,75.09394]]],
+["улица Калинина","secondary",[[54.83919,75.08911],[54.83889,75.08903],[54.83859,75.08892],[54.83787,75.08863],[54.8374,75.0885],[54.83666,75.08839],[54.83645,75.08834],[54.83621,75.08833],[54.8359,75.08819],[54.83565,75.08812],[54.83562,75.08811],[54.83462,75.08784],[54.83384,75.08759],[54.83348,75.08748],[54.83248,75.08713],[54.83211,75.08698],[54.83155,75.08671],[54.83129,75.08655],[54.831,75.08634],[54.83053,75.08592],[54.83003,75.08543],[54.82974,75.08513],[54.82927,75.08445],[54.82862,75.08339],[54.82797,75.08212],[54.82721,75.08067],[54.82653,75.07938],[54.82629,75.07894],[54.8261,75.07868],[54.82585,75.0784],[54.82565,75.07822]]],
+["Совхозная улица","residential",[[54.82762,75.09866],[54.82746,75.09614],[54.82735,75.09424],[54.82727,75.09416],[54.82722,75.09415],[54.8272,75.09399],[54.82707,75.09248],[54.8271,75.09151],[54.8271,75.0913],[54.82713,75.09119]]],
+["улица Гагарина","residential",[[54.83787,75.08863],[54.83793,75.08768],[54.83798,75.08727],[54.83811,75.08597],[54.83818,75.08522],[54.8382,75.08478],[54.8384,75.08178],[54.83847,75.08097],[54.83856,75.07933]]],
+["Пролетарская улица","tertiary",[[54.83882,75.05427],[54.83875,75.05432],[54.83868,75.0544],[54.83862,75.05453],[54.8383,75.05567],[54.83802,75.05669],[54.83774,75.05772],[54.83759,75.05822],[54.83754,75.05844],[54.83749,75.05882],[54.83747,75.05931],[54.83746,75.05988],[54.83746,75.06043],[54.83746,75.06082],[54.83745,75.06151],[54.83745,75.06182],[54.83741,75.06391],[54.83739,75.06986],[54.83739,75.0703],[54.83738,75.07078],[54.83739,75.07086],[54.83738,75.07186],[54.83735,75.07209],[54.83738,75.07308],[54.83739,75.0732],[54.83739,75.07333],[54.83741,75.07394],[54.83742,75.07453],[54.83743,75.07468],[54.83743,75.07495],[54.83743,75.0754],[54.83743,75.07594],[54.83742,75.0766],[54.83739,75.07721],[54.83734,75.07788],[54.83733,75.0781],[54.83726,75.07916],[54.83721,75.08005],[54.83717,75.08059],[54.8371,75.08114],[54.83707,75.08128],[54.837,75.08161],[54.83697,75.08175],[54.83688,75.0822],[54.83676,75.08268],[54.83665,75.08303],[54.83659,75.0832],[54.83645,75.08368],[54.83625,75.08425],[54.83613,75.08465],[54.83606,75.08499],[54.83602,75.08534],[54.836,75.08579],[54.83598,75.08633],[54.83594,75.08703],[54.83592,75.08768],[54.83591,75.08801],[54.8359,75.08819]]],
+["Садовая улица","residential",[[54.83144,75.09097],[54.83156,75.09358],[54.83161,75.09536],[54.83162,75.09544],[54.83169,75.09743],[54.8317,75.09752],[54.83178,75.09944]]],
+["Московская улица","residential",[[54.82698,75.07653],[54.82834,75.07899],[54.82889,75.07998],[54.8298,75.08147],[54.83003,75.08185],[54.83017,75.08209],[54.83026,75.08215]]],
+["Московская улица","residential",[[54.83027,75.08249],[54.83078,75.08276],[54.8312,75.08302],[54.83129,75.08312],[54.83137,75.08329],[54.83143,75.08343],[54.8315,75.08355],[54.83193,75.08399],[54.83258,75.08468]]],
+["улица Гагарина","residential",[[54.83859,75.07812],[54.83864,75.07713],[54.83863,75.07705],[54.83863,75.07689],[54.83881,75.07313]]],
+["улица Гагарина","residential",[[54.83925,75.0641],[54.83923,75.06461],[54.83923,75.06467],[54.8392,75.06518],[54.83916,75.06596],[54.83911,75.06672],[54.83906,75.06759],[54.83898,75.06879],[54.83886,75.07094]]],
+["улица Гагарина","residential",[[54.8389,75.07185],[54.83895,75.07095],[54.83907,75.06881],[54.83914,75.06763],[54.8392,75.06674],[54.83924,75.06595],[54.83929,75.06521],[54.83931,75.06468],[54.83932,75.06457],[54.83934,75.06412]]],
+["улица Комсомольская","residential",[[54.83986,75.07245],[54.83985,75.07262],[54.83974,75.07435],[54.83968,75.07551],[54.83962,75.07651],[54.83955,75.0774]]],
+["Коммунистическая улица","secondary",[[54.83346,75.12077],[54.83346,75.11931],[54.8335,75.11613],[54.83351,75.11513],[54.83353,75.11408],[54.83354,75.11364],[54.83358,75.11339],[54.83364,75.11306],[54.83375,75.1126],[54.8343,75.11032],[54.83497,75.10769],[54.83553,75.10538],[54.83582,75.10418],[54.83607,75.10307],[54.83664,75.10084],[54.83665,75.10077],[54.83734,75.09839],[54.83805,75.09592],[54.83863,75.09406],[54.83885,75.09328],[54.83891,75.09303],[54.83894,75.09272],[54.83895,75.09267],[54.83897,75.09239],[54.83899,75.092],[54.83911,75.09041],[54.83919,75.08911]]]
+];
+const STYLE_BY_HW = {
+  secondary:   { color:'#ffd76e', weight:5 },
+  tertiary:    { color:'#ffb070', weight:4.5 },
+  residential: { color:'#7fd1ff', weight:4 },
+  unclassified:{ color:'#c9a7ff', weight:3.5, dashArray:'8 6' }
+};
+const streetLayer = L.layerGroup();
+const streetsByName = {};
+STREETS_WAYS.forEach(([name, hw, pts]) => {
+  const st = STYLE_BY_HW[hw] || STYLE_BY_HW.residential;
+  const line = L.polyline(pts, { ...st, opacity:0.55 });
+  line.bindTooltip('🛣️ ' + name, { sticky:true, className:'st-name-tip' });
+  line.on('click', () => { map.fitBounds(line.getBounds(), { padding:[80,380], maxZoom:17 }); flashStreet(line, st); });
+  streetLayer.addLayer(line);
+  (streetsByName[name] = streetsByName[name] || []).push(line);
+});
+streetLayer.addTo(map);
+function flashStreet(line, base) {
+  line.setStyle({ ...base, opacity:.95, weight:(base.weight||4) + 5 });
+  setTimeout(() => line.setStyle({ ...base, opacity:.55 }), 1800);
+}
+L.control.layers({ '🗺️ Схема (OSM)': osm, '🛰️ Спутник': sat },
+  { '🛣️ Названные улицы': streetLayer, '🟩 Граница посёлка': townPoly },
+  { position:'topright' }).addTo(map);
+
+// ---------- POI ----------
 const POI_MAIN = [
   { name:'Оконешниковская ЦРБ',        cat:'Районная больница',          ico:'🏥',  pos:[54.83278,75.07444] },
   { name:'Школа',                      cat:'Среднее учебное заведение',  ico:'🏫',  pos:[54.84151,75.06851] },
@@ -225,7 +264,8 @@ const POI_MAIN = [
   { name:'Краеведческий музей',        cat:'Районный музей',             ico:'🏛️', pos:[54.83765,75.0773] },
   { name:'Мемориал (обелиск ВОВ)',     cat:'Монумент в центре посёлка',  ico:'🎗️', pos:[54.83597,75.07302] },
   { name:'Мемориал',                   cat:'Памятный знак',              ico:'🎗️', pos:[54.8357,75.07246] },
-  { name:'Памятник',                   cat:'Мемориальный объект',        ico:'🎗️', pos:[54.83711,75.0748] },  { name:'Церковь',                    cat:'Место поклонения',           ico:'⛪',  pos:[54.83222,75.0838] },
+  { name:'Памятник',                   cat:'Мемориальный объект',        ico:'🎗️', pos:[54.83711,75.0748] },
+  { name:'Церковь',                    cat:'Место поклонения',           ico:'⛪',  pos:[54.83222,75.0838] },
   { name:'Полиция',                    cat:'Отдел полиции',              ico:'👮',  pos:[54.842,75.07458] },
   { name:'Пожарная часть',             cat:'Пожарная часть',             ico:'🚒',  pos:[54.83765,75.0909] },
   { name:'Почта «Оконешниково 646940»',cat:'Почтовое отделение',         ico:'📮',  pos:[54.84137,75.07374] },
@@ -248,7 +288,13 @@ const POI_EXTRA = [
   { name:'Красное&Белое',  cat:'Магазин',                ico:'🏬', pos:[54.84033,75.07733] },
   { name:'Море пива',      cat:'Магазин',                ico:'🍺', pos:[54.84004,75.07633] },
 ];
-const POI = [ ...POI_MAIN.map(p => ({ ...p, main:true })), ...POI_EXTRA.map(p => ({ ...p, main:false })) ];
+const POI = [ ...POI_MAIN.map(p => ({ ...p, grp:'main' })), ...POI_EXTRA.map(p => ({ ...p, grp:'shop' })) ];
+
+const SHOP_LIKE = /магазин|супермаркет|салон|пункт|аптека|электрон/;
+function chipFor(p) {
+  if (p.grp === 'main') return 'main';
+  return SHOP_LIKE.test(p.cat) || p.grp === 'shop' ? 'shop' : 'main';
+}
 
 function popupHTML(p) {
   const [lat, lon] = p.pos;
@@ -257,42 +303,52 @@ function popupHTML(p) {
     <div class="pop-actions">
       <span class="coords">${lat.toFixed(5)}, ${lon.toFixed(5)}</span>
       <button onclick="copyCoords('${lat.toFixed(5)}','${lon.toFixed(5)}');event.preventDefault()">📋 координаты</button>
-      <a target="_blank" rel="noopener" href="https://yandex.ru/maps/?pt=${lon},${lat}&z=17">🧭 Яндекс.Карты</a>
+      <a target="_blank" rel="noopener" href="https://yandex.ru/maps/?pt=${lon},${lat}&z=17">🧭 Яндекс</a>
+      <a target="_blank" rel="noopener" href="https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=18/${lat}/${lon}">🌍 OSM</a>
+      <a target="_blank" rel="noopener" href="https://2gis.ru/search/${encodeURIComponent(p.name)}/center/${lon}%2C${lat}/zoom/17">🟩 2ГИС</a>
+      <button onclick="shareObj('${p.name.replace(/[\\']/g,'')}');event.preventDefault()">🔗 ссылка</button>
     </div>`;
 }
 window.copyCoords = function(lat, lon) {
   const txt = lat + ', ' + lon;
   if (navigator.clipboard) navigator.clipboard.writeText(txt).catch(()=>{});
-  else { const i = document.createElement('input'); i.value = txt; document.body.appendChild(i); i.select(); document.execCommand('copy'); i.remove(); }
+};
+window.shareObj = function(name) {
+  const p = POI.find(x => x.name === name); if (!p) return;
+  const url = SITE_URL + '#obj=' + encodeURIComponent(p.name);
+  if (navigator.share) navigator.share({ title:'Оконешниково: ' + p.name, url }).catch(()=>{});
+  else { navigator.clipboard?.writeText(url); alert('Ссылка скопирована:\n' + url); }
 };
 
 const markers = [];
 POI.forEach(p => {
-  const style = p.main
+  const isMain = p.grp === 'main';
+  const style = isMain
     ? `width:30px;height:30px;background:#fff;border:2px solid #1b6dc0;border-radius:50% 50% 50% 4px;box-shadow:0 2px 6px rgba(0,0,0,.4);font-size:14px`
     : `width:24px;height:24px;background:#eef4fb;border:1.5px solid #7f9fc4;border-radius:7px;box-shadow:0 2px 5px rgba(0,0,0,.35);font-size:12px`;
-  const anchor = p.main ? 30 : 24;
+  const anchor = isMain ? 30 : 24;
   const m = L.marker(p.pos, {
     icon: L.divIcon({ className:'', html:`<div style="display:flex;align-items:center;justify-content:center;${style}">${p.ico}</div>`,
       iconSize:[anchor,anchor], iconAnchor:[anchor/2,anchor], popupAnchor:[0,-anchor] })
   }).addTo(map);
-  m.bindPopup(() => popupHTML(p));
+  m.bindPopup(() => { location.hash = 'obj=' + encodeURIComponent(p.name); return popupHTML(p); });
   m.on('click', () => handleTap(p));
   markers.push(m);
   p._marker = m;
 });
 
-// Центр посёлка
 L.marker(CENTER, { icon: L.divIcon({ className:'', html:'<div class="home-dot"></div>', iconSize:[14,14], iconAnchor:[7,7] }) })
   .bindTooltip('Центр посёлка — торговая зона').addTo(map);
 
-const STREETS = [
-  ['улица Гагарина', 4], ['Коммунистическая улица', 2], ['Московская улица', 2],
-  ['Степная улица', 2], ['Лесная улица', 1], ['Омская улица', 1], ['Пролетарская улица', 1],
-  ['Садовая улица', 1], ['Советская улица', 1], ['Совхозная улица', 1], ['Спортивная улица', 1],
-  ['улица Калинина', 1], ['улица Кирова', 1], ['улица Комсомольская', 1], ['улица Ленина', 1],
-  ['улица Маяковского', 1], ['Школьная улица', 1], ['дорога Оконешниково — Стрельниково', 1],
-];
+// Deep link: #obj=... — открыли ссылку на конкретный объект
+const hashObj = decodeURIComponent((location.hash.match(/obj=([^&]+)/) || [,''])[1]);
+const linked = POI.find(p => p.name === hashObj);
+if (linked) {
+  setTimeout(() => {
+    map.flyTo(linked.pos, 17, { duration:1 });
+    setTimeout(() => linked._marker.openPopup(), 1100);
+  }, 600);
+}
 
 // ---------- Панель ----------
 const poiList = document.getElementById('poiList');
@@ -301,23 +357,59 @@ const gameBox = document.getElementById('gameBox');
 const infoBox = document.getElementById('infoBox');
 const filterInp = document.getElementById('filter');
 const searchWrap = document.getElementById('searchWrap');
+const chipsEl = document.getElementById('chips');
 
+let curChip = 'all';
+const CHIPS = [
+  ['all','📍 Все'], ['main','⭐ Главное'], ['shop','🛒 магазины'],
+];
+CHIPS.forEach(([key, label]) => {
+  const b = document.createElement('button');
+  b.textContent = label;
+  b.dataset.chip = key;
+  if (key === 'all') b.classList.add('on');
+  b.onclick = () => {
+    curChip = key;
+    chipsEl.querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.chip === key));
+    renderPOI(filterInp.value.trim());
+  };
+  chipsEl.appendChild(b);
+});
+
+let userPos = null;
 function renderPOI(q = '') {
+  let items = POI.filter(p => (curChip === 'all' || chipFor(p) === curChip)
+    && (!q || (p.name + ' ' + p.cat).toLowerCase().includes(q.toLowerCase())));
+  if (userPos) items = items.slice().sort((a, b) =>
+    map.distance(L.latLng(userPos), L.latLng(a.pos)) - map.distance(L.latLng(userPos), L.latLng(b.pos)));
   poiList.innerHTML = '';
-  POI.filter(p => !q || (p.name + ' ' + p.cat).toLowerCase().includes(q.toLowerCase())).forEach(p => {
+  items.forEach(p => {
     const d = document.createElement('div');
-    d.className = 'item' + (p.main ? '' : ' secondary');
-    d.innerHTML = `<div class="ico">${p.ico}</div><div class="t">${p.name}<small>${p.cat}</small></div>`;
+    d.className = 'item' + (p.grp === 'main' ? '' : ' secondary');
+    let dist = '';
+    if (userPos) dist = '<span class="dist">' + fmtM(map.distance(L.latLng(userPos), L.latLng(p.pos))) + '</span>';
+    d.innerHTML = `<div class="ico">${p.ico}</div><div class="t">${p.name}<small>${p.cat}</small></div>${dist}`;
     d.onclick = () => { map.flyTo(p.pos, window.innerWidth<720?17:16, { duration:.8 }); setTimeout(() => p._marker.openPopup(), 850); };
     poiList.appendChild(d);
   });
 }
+document.getElementById('sortBtn'); // placeholder (кнопка ниже в DOM добавляется динамически)
+
 function renderStreets(q = '') {
   streetList.innerHTML = '';
-  STREETS.filter(s => !q || s[0].toLowerCase().includes(q.toLowerCase())).forEach(s => {
+  const seen = {};
+  STREETS_WAYS.filter(s => !q || s[0].toLowerCase().includes(q.toLowerCase())).forEach(s => {
+    if (seen[s[0]]) return; seen[s[0]] = true;
+    const len = L.polyline(s[2]).getLength();
     const d = document.createElement('div');
     d.className = 'street';
-    d.innerHTML = `<span>${s[0]}</span><small>${s[1]}</small>`;
+    d.innerHTML = `<span>${s[0]}</span><small>${fmtM(len)}</small>`;
+    d.onclick = () => {
+      const lines = streetsByName[s[0]] || [];
+      const g = L.featureGroup(lines);
+      map.flyToBounds(g.getBounds(), { padding:[100,400], duration:.8, maxZoom:17 });
+      lines.forEach(l => flashStreet(l, STYLE_BY_HW[l.options.hwt] || l.options));
+    };
     streetList.appendChild(d);
   });
 }
@@ -330,9 +422,9 @@ infoBox.innerHTML = `
     <div class="row"><div class="e">👥</div><div>Население — <b>около 6 тысяч человек</b> (крупнейший населённый пункт района).</div></div>
     <div class="row"><div class="e">📮</div><div>Почтовый индекс: <b>646940</b></div></div>
     <div class="row"><div class="e">🛤️</div><div>Посёлок вырос вокруг железнодорожной станции, которая связывает его областным ж/д ходом с соседними районами.</div></div>
-    <div class="row"><div class="e">🏪</div><div>В центре посёлка — торговая зона: Пятёрочка, Магнит, Монетка, DNS, МТС, пункты Ozon и Wildberries.</div></div>
+    <div class="row"><div class="e">🏪</div><div>В центре — торговая зона: Пятёрочка, Магнит, Монетка, DNS, МТС, пункты Ozon и Wildberries.</div></div>
     <div class="row"><div class="e">🎗️</div><div>В центре — мемориальный комплекс героям Великой Отечественной войны.</div></div>
-    <div class="row"><div class="e">🎮</div><div>Попробуй <b>одушёвку «Игра»</b> — угадай положение объектов по виду на карте!</div></div>
+    <div class="row"><div class="e">🎲</div><div>Жмяк на 🎲 в шапке — сайт сам покажет случайное место (узнаёшь посёлок изнутри).</div></div>
   </div>`;
 
 // ---------- Игра ----------
@@ -342,22 +434,17 @@ function renderGame() {
     <div class="gamebox" id="gb">
       <div class="score"><span>Счёт: <b>${game.score}</b></span><span>Рекорд: <b>${game.best}</b></span></div>
       <div class="quest" id="quest"></div>
-      ${game.on
-        ? '<button class="bigbtn gray" id="giveup">Сдаться и показать ответ</button>'
-        : '<button class="bigbtn" id="startGame">▶ Начать игру</button>'}
-  <div class="panel-note" style="border-top:none">Наживай на маркер на карте — угадай, где он расположен. Клик в пределах ~60 метров от цели = очко! Очки и рекорд сохраняются.</div>
+      ${game.on ? '<button class="bigbtn gray" id="giveup">Сдаться и показать ответ</button>'
+                : '<button class="bigbtn" id="startGame">▶ Начать игру</button>'}
+      <div class="panel-note" style="border-top:none">Кликай по маркеру на карте, где, по-твоему, находится объект. Попадание в радиусе ~60 м = очко!</div>
     </div>`;
   document.getElementById('startGame')?.addEventListener('click', startGame);
   document.getElementById('giveup')?.addEventListener('click', giveUp);
   document.getElementById('quest').innerHTML = game.on
-    ? `Наживи на карте: <b>${game.target.ico} ${game.target.name}</b>`
-    : 'Найди все знаковые места посёлка наизусть ✈️';
+    ? `Найди на карте: <b>${game.target.ico} ${game.target.name}</b>`
+    : 'Найди все знаковые места посёлка по памяти ✈️';
 }
-document.getElementById('gb')?.classList.add('game');
-
-function startGame() {
-  game.on = true; game.score = 0; game.misses = 0; nextRound();
-}
+function startGame() { game.on = true; game.score = 0; game.misses = 0; nextRound(); }
 function nextRound() {
   let t;
   do { t = POI[Math.floor(Math.random()*POI.length)]; } while (game.target === t && POI.length > 1);
@@ -379,16 +466,13 @@ function handleTap(p) {
   if (d <= 60) {
     game.score++; if (game.score > game.best) { game.best = game.score; localStorage.setItem('okn_best', game.best); }
     if (gb) { gb.classList.add('flash-good'); setTimeout(() => gb.classList.remove('flash-good'), 800); }
-    document.getElementById('quest').innerHTML = '🎉 <b>В точку!</b> (+1 очко)';
+    document.getElementById('quest').innerHTML = '🎉 <b>В точку!</b> (+1)';
     game.target._marker.openPopup();
     setTimeout(nextRound, 1200);
   } else {
     game.misses++;
     if (gb) { gb.classList.remove('flash-bad'); void gb.offsetWidth; gb.classList.add('flash-bad'); }
-    document.getElementById('quest').innerHTML =
-      game.misses >= 3
-        ? `Не он! ${p.ico} <b>${p.name}</b> (${fmtM(d)} м от цели). Пока целим на… 🔎`
-        : `Мимо: это ${p.name} (${fmtM(d)} м от цели). Попробуй ещё!`;
+    document.getElementById('quest').innerHTML = `Мимо: это ${p.name} (${fmtM(d)} м от цели). Попробуй ещё!`;
   }
 }
 function fmtM(m) { return m >= 1000 ? (m/1000).toFixed(1) + ' км' : Math.round(m) + ' м'; }
@@ -407,12 +491,13 @@ const WCODE = c => c===0?'☀️':c<3?'🌤️':c===3?'☁️':c<48?'🌫️':c<
   } catch (e) { document.getElementById('weatherChip').innerHTML = '<span class="d">погода недоступна</span>'; }
 })();
 
-// ---------- Моё местоположение ----------
+// ---------- Геолокация ----------
 let userMarker = null, userCircle = null;
-document.getElementById('locBtn').onclick = () => {
-  if (!navigator.geolocation) { alert('Геолокация не поддерживается этим устройством'); return; }
+function findUser(beforeFly) {
+  if (!navigator.geolocation) { alert('Геолокация не поддерживается'); return; }
   navigator.geolocation.getCurrentPosition(pos => {
     const ll = [pos.coords.latitude, pos.coords.longitude];
+    userPos = ll;
     if (userMarker) map.removeLayer(userMarker);
     if (userCircle) map.removeLayer(userCircle);
     userMarker = L.marker(ll, { icon: L.divIcon({ className:'', html:'<div class="user-dot"></div>', iconSize:[18,18], iconAnchor:[9,9] }) }).addTo(map);
@@ -423,16 +508,32 @@ document.getElementById('locBtn').onclick = () => {
     userMarker.bindPopup(`<div class="pop-title">📍 Ты здесь</div>
       <div class="pop-cat">точность ±${Math.round(pos.coords.accuracy||30)} м</div>
       <div class="pop-cat">Ближайший объект: ${nearest.ico} ${nearest.name} — ${fmtM(nd)}</div>
-      <div class="pop-actions"><a target="_blank" rel="noopener" href="https://yandex.ru/maps/?rtext=~${ll[0]},${ll[1]}~${nearest.pos[0]},${nearest.pos[1]}">🚗 маршрут до ${nearest.name}</a></div>`);
+      <div class="pop-actions"><a target="_blank" rel="noopener" href="https://yandex.ru/maps/?rtext=~${ll[0]},${ll[1]}~${nearest.pos[0]},${nearest.pos[1]}">🚗 маршрут</a></div>`);
+    renderPOI(filterInp.value.trim()); // перерисовать с расстояниями
+    beforeFly && beforeFly();
   }, () => alert('Не удалось получить местоположение. Проверь разрешения браузера.'), { enableHighAccuracy:true });
+}
+document.getElementById('locBtn').onclick = () => findUser();
+
+// Сортировка по расстоянию
+const sortBtn = document.createElement('button');
+sortBtn.id = 'sortBtn';
+sortBtn.textContent = '📏 Показать объекты по расстоянию от меня';
+sortBtn.onclick = () => { if (!userPos) findUser(); else { sortBtn.textContent='📏 Уже отсортировано ✓'; setTimeout(()=>sortBtn.textContent='📏 Показать объекты по расстоянию от меня', 1500); } };
+filterInp.parentElement.parentElement.insertBefore(sortBtn, filterInp.parentElement.parentElement.querySelector('.chips'));
+
+// ---------- Случайное место ----------
+document.getElementById('randBtn').onclick = () => {
+  const p = POI[Math.floor(Math.random()*POI.length)];
+  map.flyTo(p.pos, 16.5, { duration:1 });
+  setTimeout(() => p._marker.openPopup(), 1100);
 };
 
 // ---------- Поделиться ----------
 document.getElementById('shareBtn').onclick = async () => {
-  const data = { title:'Карта пгт Оконешниково', text:'Интерактивная карта посёлка Оконешниково: улицы, дома, достопримечательности',
-    url:'https://comesee10.github.io/' };
+  const data = { title:'Карта пгт Оконешниково', text:'Интерактивная карта посёлка Оконешниково: улицы, дома, достопримечательности', url: location.href };
   if (navigator.share) { try { await navigator.share(data); } catch(e){} }
-  else { navigator.clipboard?.writeText(data.url); alert(data.url); }
+  else { navigator.clipboard?.writeText(location.href); alert(location.href); }
 };
 
 // ---------- Табы ----------
@@ -443,8 +544,11 @@ document.querySelectorAll('.panel-tabs button').forEach(b => {
     b.classList.add('active');
     const t = b.dataset.tab;
     Object.entries(tabs).forEach(([k, el]) => el.style.display = k === t ? '' : 'none');
+    chipsEl.style.display = t === 'poi' ? 'flex' : 'none';
+    sortBtn.style.display = t === 'poi' ? '' : 'none';
     searchWrap.style.display = (t === 'game' || t === 'info') ? 'none' : '';
-    filterInp.value = '';
+    filterInp.value = ''; curChip = 'all';
+    chipsEl.querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.chip === 'all'));
     renderPOI(); renderStreets();
     if (t === 'game') renderGame();
   };
@@ -456,7 +560,7 @@ filterInp.addEventListener('input', () => {
   if (active === 'streets') renderStreets(q);
 });
 
-// ---------- Сервис-воркер ----------
+// ---------- PWA ----------
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
 
 // ---------- Раскладка ----------
@@ -481,7 +585,7 @@ window.addEventListener('load', sizeFix);
 sizeFix();
 renderGame();
 
-setTimeout(() => { try { map.fitBounds(townPoly.getBounds(), { padding: window.innerWidth < 720 ? [40,40] : [60, 360] }); } catch(e){} }, 400);
+setTimeout(() => { try { if (!linked) map.fitBounds(townPoly.getBounds(), { padding: window.innerWidth < 720 ? [40,40] : [60, 360] }); } catch(e){} }, 400);
 </script>
 </body>
 </html>
