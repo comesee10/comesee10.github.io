@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#1b2a3d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Оконешниково">
 <!-- SEO -->
 <title>Карта пгт Оконешниково Омской области — улицы, дома, достопримечательности (райцентр Оконешниковского района Омской области)</title>
 <meta name="description" content="Интерактивная карта посёлка Оконешниково (Оконешниковский район, Омская область): улицы Гагарина, Ленина, Советская и др., дома, больница ЦРБ, музей, мемориалы ВОВ, АЗС. Спутник и схема, работает офлайн.">
@@ -13,7 +17,6 @@
 <meta name="geo.placename" content="Оконешниково">
 <meta name="geo.position" content="54.83746;75.07320">
 <meta name="ICBM" content="54.83746, 75.07320">
-<!-- Open Graph (красивое превью при отправке ссылки) -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="Карта пгт Оконешниково — улицы, дома, достопримечательности">
 <meta property="og:description" content="Интерактивная карта посёлка Оконешниково Омской области: все улицы, ориентиры и важные объекты. Спутник, схема, офлайн-режим.">
@@ -21,25 +24,20 @@
 <meta property="og:locale" content="ru_RU">
 <meta property="og:url" content="https://comesee10.github.io/">
 <meta name="twitter:card" content="summary_large_image">
-<!-- Подтверждение владения сайтом: Яндекс.Вебмастер -->
 <meta name="yandex-verification" content="545bdf55126366c2">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Оконешниково">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">
 <style>
   :root {
-    --bg1: #1b2a3d; --bg2: #12203a; --accent: #7fd1ff; --panel: rgba(16, 28, 48, .93);
+    --bg1:#1b2a3d; --bg2:#12203a; --accent:#7fd1ff; --panel:rgba(16,28,48,.93);
   }
   * { margin:0; padding:0; box-sizing:border-box; }
   html, body { height:100%; font-family:"Segoe UI", Arial, sans-serif; }
   .app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
   header {
-    height:58px; flex:0 0 auto; display:flex; align-items:center; gap:14px; padding:0 18px;
+    height:58px; flex:0 0 auto; display:flex; align-items:center; gap:12px; padding:0 18px;
     background:linear-gradient(90deg, var(--bg1), var(--bg2)); color:#eaf4ff;
     box-shadow:0 2px 10px rgba(0,0,0,.35); z-index:1200;
   }
@@ -51,6 +49,19 @@
     font-size:11.5px; color:#ffe9a8; background:rgba(255,220,120,.12);
     border:1px solid rgba(255,220,120,.35); border-radius:20px; padding:4px 12px;
   }
+  #weatherChip {
+    display:flex; align-items:center; gap:8px; font-size:13px; color:#fff;
+    background:rgba(127,209,255,.12); border:1px solid rgba(127,209,255,.35);
+    border-radius:20px; padding:5px 14px; white-space:nowrap; cursor:default;
+  }
+  #weatherChip .t { font-weight:700; font-size:15px; }
+  #weatherChip .d { color:#9fc4e8; font-size:11px; }
+  #shareBtn,#locBtn {
+    height:38px; min-width:38px; border:none; cursor:pointer;
+    background:rgba(127,209,255,.12); color:#cfe6ff; font-size:17px;
+    border:1px solid rgba(127,209,255,.3); border-radius:12px;
+  }
+  #shareBtn:hover,#locBtn:hover { background:rgba(127,209,255,.25); }
   #map { position:absolute; top:0; left:0; right:0; bottom:0; }
 
   .panel {
@@ -59,7 +70,7 @@
     border:1px solid rgba(128,180,255,.25); border-right:none; z-index:1000;
     display:flex; flex-direction:column; color:#e8f1fb; transition:transform .25s;
   }
-  .panel.hidden { transform:translateX(330px); }
+  .panel.hidden { transform:translateX(110%); }
   .panel-toggle {
     position:absolute; top:14px; right:0; z-index:1001; margin-top:10px;
     height:34px; width:34px; padding:0; border:none; border-radius:8px 0 0 8px;
@@ -69,7 +80,7 @@
   .panel-tabs { display:flex; border-bottom:1px solid rgba(128,180,255,.25); }
   .panel-tabs button {
     flex:1; padding:10px 0; background:transparent; color:#8fb4d8; border:none;
-    font-size:13.5px; cursor:pointer; border-bottom:2px solid transparent;
+    font-size:13px; cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap;
   }
   .panel-tabs button.active { color:#fff; border-bottom-color:var(--accent); }
   .panel-search { padding:10px 12px; }
@@ -78,36 +89,70 @@
     background:rgba(255,255,255,.07); color:#fff; font-size:13px; outline:none;
   }
   .panel-list { overflow-y:auto; padding:4px 8px 14px; flex:1; }
-  .item {
-    display:flex; align-items:center; gap:10px; padding:8px 8px; border-radius:8px; cursor:pointer;
-  }
+  .item { display:flex; align-items:center; gap:10px; padding:8px; border-radius:8px; cursor:pointer; }
   .item:hover { background:rgba(120,190,255,.14); }
   .item .ico { width:28px; height:28px; flex:0 0 28px; display:flex; align-items:center; justify-content:center;
     background:rgba(127,209,255,.15); border-radius:8px; font-size:15px; }
+  .item.secondary .ico { background:rgba(255,255,255,.08); }
   .item .t { font-size:13px; line-height:1.3; }
   .item .t small { display:block; color:#8fb4d8; font-size:11px; }
   .street { padding:6px 10px; font-size:13px; border-radius:7px; cursor:pointer; display:flex; justify-content:space-between; color:#d9e8f7; }
   .street:hover { background:rgba(120,190,255,.14); }
   .street small { color:#7ea6cf; }
   .panel-note { padding:8px 12px; font-size:10.5px; color:#7ea6cf; line-height:1.45; border-top:1px solid rgba(128,180,255,.2); }
+
+  .infobox { padding:10px 14px; font-size:13px; line-height:1.6; color:#d9e8f7; }
+  .infobox b { color:#fff; }
+  .infobox .row { display:flex; gap:10px; margin:7px 0; align-items:flex-start; }
+  .infobox .row .e { font-size:18px; width:24px; text-align:center; }
+
+  .gamebox { padding:12px 14px; text-align:center; }
+  .gamebox .score { display:flex; justify-content:space-between; background:rgba(127,209,255,.1); border-radius:10px; padding:8px 14px; margin-bottom:12px; font-size:13px; }
+  .gamebox .score b { color:#ffd76e; font-size:16px; }
+  .gamebox .quest { font-size:14.5px; line-height:1.5; min-height:44px; margin-bottom:12px; }
+  .gamebox .quest b { color:#7fd1ff; font-size:16px; }
+  .gamebox .bigbtn {
+    width:100%; padding:10px 0; font-size:14px; font-weight:600; color:#0e2033;
+    background:linear-gradient(90deg,#7fd1ff,#57c17a); border:none; border-radius:10px; cursor:pointer; margin-top:8px;
+  }
+  .gamebox .bigbtn.gray { background:rgba(255,255,255,.15); color:#cfe6ff; }
+  .gamebox .res { font-size:14px; margin:10px 0; line-height:1.5; color:#ffe9a8; }
+  .game.flash-good { animation:good .8s; } .game.flash-bad { animation:bad .8s; }
+  @keyframes good { 0%,100%{background:transparent} 40%{background:rgba(87,193,122,.25)} }
+  @keyframes bad  { 0%,100%{background:transparent} 40%{background:rgba(255,90,90,.25)} }
+
   .leaflet-popup-content-wrapper { border-radius:10px; }
   .pop-title { font-weight:700; font-size:14px; margin-bottom:3px; }
   .pop-cat { font-size:12px; color:#557; }
-  img.pulse { display:none; }
+  .pop-actions { margin-top:8px; display:flex; gap:8px; align-items:center; font-size:12px; flex-wrap:wrap; }
+  .pop-actions a, .pop-actions button {
+    font-size:12px; text-decoration:none; color:#1b6dc0; background:rgba(27,109,192,.08);
+    border:1px solid rgba(27,109,192,.3); border-radius:7px; padding:3px 9px; cursor:pointer;
+  }
+  .pop-actions button:hover, .pop-actions a:hover { background:rgba(27,109,192,.16); }
+  .coords { font-size:11px; color:#77a; font-family:Consolas, monospace; }
   .home-dot {
     width:14px; height:14px; border-radius:50%; background:#ff5f5f; border:3px solid #fff;
     box-shadow:0 0 0 4px rgba(255,95,95,.35);
   }
-  /* --- Мобильная вёрстка --- */
-  @media (max-width: 720px) {
-    header { padding:0 12px; gap:10px; }
+  .user-dot {
+    width:18px; height:18px; border-radius:50%; background:#8b5cff; border:3px solid #fff;
+    box-shadow:0 0 0 1000px translucent, 0 0 0 4px rgba(139,92,255,.35), 0 0 12px rgba(139,92,255,.8);
+  }
+  @media (max-width:720px) {
+    header { padding:0 10px; gap:8px; height:54px; }
     header .logo { font-size:22px; }
-    header h1 { font-size:16px; }
-    header .sub { font-size:10px; }
+    header h1 { font-size:15px; }
+    header .sub { display:none; }
     header .badge { display:none; }
-    .panel { width:min(330px, 88vw); max-height:calc(100% - 76px); border-radius:12px 0 0 12px; }
+    #weatherChip { padding:4px 8px; font-size:11px; gap:5px; }
+    #weatherChip .t { font-size:13px; }
+    #weatherChip .d { font-size:9px; }
+    #shareBtn,#locBtn { height:34px; min-width:34px; font-size:14px; }
+    .panel { width:min(330px, 88vw); max-height:calc(100% - 66px); }
     .panel.hidden { transform:translateX(110%); }
-    .panel-tabs button { padding:12px 2px; font-size:12.5px; }
+    .panel-tabs button { padding:12px 0; font-size:11px; }
+    .leaflet-control-attribution { font-size:9px; }
   }
 </style>
 </head>
@@ -117,10 +162,13 @@
     <div class="logo">🗺️</div>
     <div>
       <h1>Оконешниково</h1>
-      <div class="sub">пгт, райцентр Оконешниковского района, Омская область • 54.837° с.ш., 75.073° в.д. • ~6 тыс. жителей</div>
+      <div class="sub">пгт, райцентр Оконешниковского района, Омская область • ~6 тыс. жителей • индекс 646940</div>
     </div>
     <div class="spacer"></div>
-    <div class="badge">данные OpenStreetMap</div>
+    <div id="weatherChip" title="Погода в посёлке сейчас (Open-Meteo)">… погода</div>
+    <button id="shareBtn" title="Поделиться">🔗</button>
+    <button id="locBtn" title="Показать, где я">🎯</button>
+    <div class="badge">данные OSM</div>
   </header>
 
   <div style="position:relative; flex:1 1 auto; min-height:260px;">
@@ -128,18 +176,21 @@
     <button class="panel-toggle" id="toggle" title="Скрыть/показать панель">◀</button>
     <div class="panel" id="panel">
       <div class="panel-tabs">
-        <button class="active" data-tab="poi">📍 Достопримечательности</button>
+        <button class="active" data-tab="poi">📍 Места</button>
         <button data-tab="streets">🛣️ Улицы</button>
+        <button data-tab="game">🎯 Игра</button>
+        <button data-tab="info">ℹ️ Инфо</button>
       </div>
-      <div class="panel-search">
+      <div class="panel-search" id="searchWrap">
         <input id="filter" type="text" placeholder="Поиск по названию…">
       </div>
       <div class="panel-list" id="poiList"></div>
       <div class="panel-list" id="streetList" style="display:none"></div>
+      <div class="panel-list" id="gameBox" style="display:none"></div>
+      <div class="panel-list" id="infoBox" style="display:none"></div>
       <div class="panel-note">
-        Улицы и дома отображаются с подложки OpenStreetMap. Внимание: OSM-данные по
-        Оконешникову неполные (названы не все улицы, не у всех зданий есть контуры),
-        поэтому часть мелких улиц на схеме может отсутствовать.
+        Улицы и дома — с подложки OpenStreetMap. OSM-данные по посёлку неполные:
+        названы не все улицы, поэтому часть мелких проездов может отсутствовать.
       </div>
     </div>
   </div>
@@ -149,16 +200,12 @@
 <script>
 const CENTER = [54.83746, 75.07320];
 
-const map = L.map('map', { zoomControl: false }).setView(CENTER, 14);
+const map = L.map('map', { zoomControl:false }).setView(CENTER, 14);
 L.control.zoom({ position:'bottomleft' }).addTo(map);
 L.control.scale({ imperial:false, position:'bottomleft' }).addTo(map);
 
-const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
-});
-const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-  maxZoom: 19, attribution: 'Esri, Maxar'
-});
+const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'&copy; OpenStreetMap contributors' });
+const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom:19, attribution:'Esri, Maxar' });
 osm.addTo(map);
 L.control.layers({ '🗺️ Схема (OSM)': osm, '🛰️ Спутник': sat }, null, { position:'topright' }).addTo(map);
 
@@ -168,48 +215,77 @@ const townPoly = L.polygon([[54.83841,75.05119],[54.84077,75.05265],[54.84015,75
 }).addTo(map);
 townPoly.bindTooltip('Граница пгт Оконешниково (контур застройки по данным OSM)', { sticky:true });
 
-// Центр посёлка
-L.marker(CENTER, {
-  icon: L.divIcon({ className:'', html:'<div class="home-dot"></div>', iconSize:[14,14], iconAnchor:[7,7] })
-}).bindTooltip('Центр посёлка — ул. Ленина (торговая зона)', { permanent:false });
-L.marker(CENTER).setOpacity(0).addTo(map);
-
-// Достопримечательности (POI из OSM)
-const POI = [
-  { name:'Оконешниковская ЦРБ',        cat:'Районная больница',      catKey:'hospital',      ico:'🏥',    pos:[54.83278,75.07444] },
-  { name:'Школа',                      cat:'Среднее учебное заведение', catKey:'school',     ico:'🏫',    pos:[54.84151,75.06851] },
-  { name:'Детский сад',                cat:'Дошкольное учреждение',  catKey:'kindergarten',  ico:'🧸',    pos:[54.83778,75.07943] },
-  { name:'Спорткомплекс',              cat:'Спортивный центр',       catKey:'sport',         ico:'🏟️',   pos:[54.83416,75.07803] },
-  { name:'Библиотека',                 cat:'Межпоселенческая библиотека', catKey:'library',  ico:'📚',    pos:[54.83857,75.07277] },
-  { name:'Краеведческий музей',        cat:'Ветеринарная улица, районный музей', catKey:'museum', ico:'🏛️', pos:[54.83765,75.0773] },
-  { name:'Мемориал (обелиск ВОВ)',     cat:'Монумент в центре посёлка', catKey:'memorial',   ico:'🎗️',   pos:[54.83597,75.07302] },
-  { name:'Мемориал',                   cat:'Памятный знак',          catKey:'memorial',      ico:'🎗️',   pos:[54.8357,75.07246] },
-  { name:'Памятник',                   cat:'Мемориальный объект',    catKey:'memorial',      ico:'🎗️',   pos:[54.83711,75.0748] },
-  { name:'Церковь',                    cat:'Место поклонения',       catKey:'worship',       ico:'⛪',    pos:[54.83222,75.0838] },
-  { name:'Полиция',                    cat:'Отдел полиции',          catKey:'police',        ico:'👮',    pos:[54.842,75.07458] },
-  { name:'Пожарная часть',            cat:'ПЧ',                     catKey:'fire',          ico:'🚒',    pos:[54.83765,75.0909] },
-  { name:'Почта «Оконешниково 646940»', cat:'Почтовое отделение',    catKey:'post',          ico:'📮',    pos:[54.84137,75.07374] },
-  { name:'Аптека «Фармакопейка»',      cat:'Аптека',                 catKey:'pharmacy',      ico:'💊',    pos:[54.84048,75.07451] },
-  { name:'Аптека «Апрель»',            cat:'Аптека',                 catKey:'pharmacy',      ico:'💊',    pos:[54.84014,75.07522] },
-  { name:'Омская энергосбытовая компания', cat:'Организация',        catKey:'gov',           ico:'🏢',    pos:[54.84043,75.07735] },
-  { name:'АЗС «Газпромнефть»',         cat:'Заправка',               catKey:'fuel',          ico:'⛽',    pos:[54.84508,75.05309] },
-  { name:'АЗС «Топлайн №10»',          cat:'Заправка',               catKey:'fuel',          ico:'⛽',    pos:[54.84426,75.05684] },
+// Главные объекты
+const POI_MAIN = [
+  { name:'Оконешниковская ЦРБ',        cat:'Районная больница',          ico:'🏥',  pos:[54.83278,75.07444] },
+  { name:'Школа',                      cat:'Среднее учебное заведение',  ico:'🏫',  pos:[54.84151,75.06851] },
+  { name:'Детский сад',                cat:'Дошкольное учреждение',      ico:'🧸',  pos:[54.83778,75.07943] },
+  { name:'Спорткомплекс',              cat:'Спортивный центр',           ico:'🏟️', pos:[54.83416,75.07803] },
+  { name:'Библиотека',                 cat:'Межпоселенческая библиотека',ico:'📚',  pos:[54.83857,75.07277] },
+  { name:'Краеведческий музей',        cat:'Районный музей',             ico:'🏛️', pos:[54.83765,75.0773] },
+  { name:'Мемориал (обелиск ВОВ)',     cat:'Монумент в центре посёлка',  ico:'🎗️', pos:[54.83597,75.07302] },
+  { name:'Мемориал',                   cat:'Памятный знак',              ico:'🎗️', pos:[54.8357,75.07246] },
+  { name:'Памятник',                   cat:'Мемориальный объект',        ico:'🎗️', pos:[54.83711,75.0748] },  { name:'Церковь',                    cat:'Место поклонения',           ico:'⛪',  pos:[54.83222,75.0838] },
+  { name:'Полиция',                    cat:'Отдел полиции',              ico:'👮',  pos:[54.842,75.07458] },
+  { name:'Пожарная часть',             cat:'Пожарная часть',             ico:'🚒',  pos:[54.83765,75.0909] },
+  { name:'Почта «Оконешниково 646940»',cat:'Почтовое отделение',         ico:'📮',  pos:[54.84137,75.07374] },
+  { name:'Аптека «Фармакопейка»',      cat:'Аптека',                     ico:'💊',  pos:[54.84048,75.07451] },
+  { name:'Аптека «Апрель»',            cat:'Аптека',                     ico:'💊',  pos:[54.84014,75.07522] },
+  { name:'Омская энергосбытовая',      cat:'Коммунальные службы',        ico:'🏢',  pos:[54.84043,75.07735] },
+  { name:'АЗС «Газпромнефть»',         cat:'Заправка',                   ico:'⛽',  pos:[54.84508,75.05309] },
+  { name:'АЗС «Топлайн №10»',          cat:'Заправка',                   ico:'⛽',  pos:[54.84426,75.05684] },
 ];
+const POI_EXTRA = [
+  { name:'Пятёрочка',      cat:'Супермаркет',            ico:'🛒', pos:[54.8401,75.07551] },
+  { name:'Магнит',         cat:'Супермаркет',            ico:'🛒', pos:[54.84019,75.07358] },
+  { name:'Монетка',        cat:'Магазин у дома',         ico:'🏪', pos:[54.84057,75.07506] },
+  { name:'Светофор',       cat:'Супермаркет',            ico:'🛒', pos:[54.84005,75.07618] },
+  { name:'DNS',            cat:'Магазин электроники',    ico:'💻', pos:[54.84011,75.07395] },
+  { name:'МТС',            cat:'Салон связи',            ico:'📱', pos:[54.84,75.07292] },
+  { name:'Ozon (пункт №1)',cat:'Пункт выдачи заказов',   ico:'📦', pos:[54.83754,75.07769] },
+  { name:'Ozon (пункт №2)',cat:'Пункт выдачи заказов',   ico:'📦', pos:[54.84005,75.07696] },
+  { name:'Wildberries',    cat:'Пункт выдачи заказов',   ico:'📦', pos:[54.84002,75.07731] },
+  { name:'Красное&Белое',  cat:'Магазин',                ico:'🏬', pos:[54.84033,75.07733] },
+  { name:'Море пива',      cat:'Магазин',                ico:'🍺', pos:[54.84004,75.07633] },
+];
+const POI = [ ...POI_MAIN.map(p => ({ ...p, main:true })), ...POI_EXTRA.map(p => ({ ...p, main:false })) ];
+
+function popupHTML(p) {
+  const [lat, lon] = p.pos;
+  return `<div class="pop-title">${p.ico} ${p.name}</div>
+    <div class="pop-cat">${p.cat}</div>
+    <div class="pop-actions">
+      <span class="coords">${lat.toFixed(5)}, ${lon.toFixed(5)}</span>
+      <button onclick="copyCoords('${lat.toFixed(5)}','${lon.toFixed(5)}');event.preventDefault()">📋 координаты</button>
+      <a target="_blank" rel="noopener" href="https://yandex.ru/maps/?pt=${lon},${lat}&z=17">🧭 Яндекс.Карты</a>
+    </div>`;
+}
+window.copyCoords = function(lat, lon) {
+  const txt = lat + ', ' + lon;
+  if (navigator.clipboard) navigator.clipboard.writeText(txt).catch(()=>{});
+  else { const i = document.createElement('input'); i.value = txt; document.body.appendChild(i); i.select(); document.execCommand('copy'); i.remove(); }
+};
 
 const markers = [];
-POI.forEach((p, i) => {
+POI.forEach(p => {
+  const style = p.main
+    ? `width:30px;height:30px;background:#fff;border:2px solid #1b6dc0;border-radius:50% 50% 50% 4px;box-shadow:0 2px 6px rgba(0,0,0,.4);font-size:14px`
+    : `width:24px;height:24px;background:#eef4fb;border:1.5px solid #7f9fc4;border-radius:7px;box-shadow:0 2px 5px rgba(0,0,0,.35);font-size:12px`;
+  const anchor = p.main ? 30 : 24;
   const m = L.marker(p.pos, {
-    icon: L.divIcon({
-      className:'', html:`<div style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;background:#fff;border:2px solid #1b6dc0;border-radius:50% 50% 50% 4px;transform:rotate(0deg);box-shadow:0 2px 6px rgba(0,0,0,.4);font-size:14px"><span style="position:relative">${p.ico}</span></div>`,
-      iconSize:[30,30], iconAnchor:[15,30], popupAnchor:[0,-28]
-    })
+    icon: L.divIcon({ className:'', html:`<div style="display:flex;align-items:center;justify-content:center;${style}">${p.ico}</div>`,
+      iconSize:[anchor,anchor], iconAnchor:[anchor/2,anchor], popupAnchor:[0,-anchor] })
   }).addTo(map);
-  m.bindPopup(`<div class="pop-title">${p.ico} ${p.name}</div><div class="pop-cat">${p.cat}</div>`);
+  m.bindPopup(() => popupHTML(p));
+  m.on('click', () => handleTap(p));
   markers.push(m);
   p._marker = m;
 });
 
-// Улицы (именованные сегменты из OSM)
+// Центр посёлка
+L.marker(CENTER, { icon: L.divIcon({ className:'', html:'<div class="home-dot"></div>', iconSize:[14,14], iconAnchor:[7,7] }) })
+  .bindTooltip('Центр посёлка — торговая зона').addTo(map);
+
 const STREETS = [
   ['улица Гагарина', 4], ['Коммунистическая улица', 2], ['Московская улица', 2],
   ['Степная улица', 2], ['Лесная улица', 1], ['Омская улица', 1], ['Пролетарская улица', 1],
@@ -218,47 +294,172 @@ const STREETS = [
   ['улица Маяковского', 1], ['Школьная улица', 1], ['дорога Оконешниково — Стрельниково', 1],
 ];
 
-// ---- Панель ----
+// ---------- Панель ----------
 const poiList = document.getElementById('poiList');
 const streetList = document.getElementById('streetList');
+const gameBox = document.getElementById('gameBox');
+const infoBox = document.getElementById('infoBox');
 const filterInp = document.getElementById('filter');
+const searchWrap = document.getElementById('searchWrap');
 
 function renderPOI(q = '') {
   poiList.innerHTML = '';
-  POI.forEach((p, i) => {
-    if (q && !(p.name + ' ' + p.cat).toLowerCase().includes(q.toLowerCase())) return;
+  POI.filter(p => !q || (p.name + ' ' + p.cat).toLowerCase().includes(q.toLowerCase())).forEach(p => {
     const d = document.createElement('div');
-    d.className = 'item';
+    d.className = 'item' + (p.main ? '' : ' secondary');
     d.innerHTML = `<div class="ico">${p.ico}</div><div class="t">${p.name}<small>${p.cat}</small></div>`;
-    d.onclick = () => {
-      map.flyTo(p.pos, 17, { duration:.8 });
-      setTimeout(() => p._marker.openPopup(), 850);
-    };
+    d.onclick = () => { map.flyTo(p.pos, window.innerWidth<720?17:16, { duration:.8 }); setTimeout(() => p._marker.openPopup(), 850); };
     poiList.appendChild(d);
   });
 }
 function renderStreets(q = '') {
   streetList.innerHTML = '';
-  STREETS.forEach(s => {
-    if (q && !s[0].toLowerCase().includes(q.toLowerCase())) return;
+  STREETS.filter(s => !q || s[0].toLowerCase().includes(q.toLowerCase())).forEach(s => {
     const d = document.createElement('div');
     d.className = 'street';
     d.innerHTML = `<span>${s[0]}</span><small>${s[1]}</small>`;
-    d.title = 'Откроется на карте';
     streetList.appendChild(d);
   });
 }
 renderPOI(); renderStreets();
 
+infoBox.innerHTML = `
+  <div class="infobox">
+    <div class="row"><div class="e">🏞️</div><div><b>Оконешниково</b> — посёлок городского типа, административный центр <b>Оконешниковского района</b> Омской области (Сибирский федеральный округ).</div></div>
+    <div class="row"><div class="e">🧭</div><div>Координаты центра: <b>54.8375° с.ш., 75.0727° в.д.</b> Расположен в юго-восточной части области, недалеко от границы с Казахстаном.</div></div>
+    <div class="row"><div class="e">👥</div><div>Население — <b>около 6 тысяч человек</b> (крупнейший населённый пункт района).</div></div>
+    <div class="row"><div class="e">📮</div><div>Почтовый индекс: <b>646940</b></div></div>
+    <div class="row"><div class="e">🛤️</div><div>Посёлок вырос вокруг железнодорожной станции, которая связывает его областным ж/д ходом с соседними районами.</div></div>
+    <div class="row"><div class="e">🏪</div><div>В центре посёлка — торговая зона: Пятёрочка, Магнит, Монетка, DNS, МТС, пункты Ozon и Wildberries.</div></div>
+    <div class="row"><div class="e">🎗️</div><div>В центре — мемориальный комплекс героям Великой Отечественной войны.</div></div>
+    <div class="row"><div class="e">🎮</div><div>Попробуй <b>одушёвку «Игра»</b> — угадай положение объектов по виду на карте!</div></div>
+  </div>`;
+
+// ---------- Игра ----------
+const game = { on:false, target:null, score:0, best:+(localStorage.getItem('okn_best')||0), misses:0 };
+function renderGame() {
+  gameBox.innerHTML = `
+    <div class="gamebox" id="gb">
+      <div class="score"><span>Счёт: <b>${game.score}</b></span><span>Рекорд: <b>${game.best}</b></span></div>
+      <div class="quest" id="quest"></div>
+      ${game.on
+        ? '<button class="bigbtn gray" id="giveup">Сдаться и показать ответ</button>'
+        : '<button class="bigbtn" id="startGame">▶ Начать игру</button>'}
+  <div class="panel-note" style="border-top:none">Наживай на маркер на карте — угадай, где он расположен. Клик в пределах ~60 метров от цели = очко! Очки и рекорд сохраняются.</div>
+    </div>`;
+  document.getElementById('startGame')?.addEventListener('click', startGame);
+  document.getElementById('giveup')?.addEventListener('click', giveUp);
+  document.getElementById('quest').innerHTML = game.on
+    ? `Наживи на карте: <b>${game.target.ico} ${game.target.name}</b>`
+    : 'Найди все знаковые места посёлка наизусть ✈️';
+}
+document.getElementById('gb')?.classList.add('game');
+
+function startGame() {
+  game.on = true; game.score = 0; game.misses = 0; nextRound();
+}
+function nextRound() {
+  let t;
+  do { t = POI[Math.floor(Math.random()*POI.length)]; } while (game.target === t && POI.length > 1);
+  game.target = t;
+  renderGame();
+}
+function giveUp() {
+  if (!game.target) return;
+  map.flyTo(game.target.pos, 16, { duration:.8 });
+  setTimeout(() => game.target._marker.openPopup(), 900);
+  document.getElementById('quest').innerHTML = `Это был(а) <b>${game.target.ico} ${game.target.name}</b> — ${game.target.cat}`;
+  game.target = null; game.on = false;
+  setTimeout(renderGame, 2500);
+}
+function handleTap(p) {
+  if (!game.on || p === game.target) { p._marker.openPopup(); return; }
+  const d = map.distance(L.latLng(p.pos), L.latLng(game.target.pos));
+  const gb = document.getElementById('gb');
+  if (d <= 60) {
+    game.score++; if (game.score > game.best) { game.best = game.score; localStorage.setItem('okn_best', game.best); }
+    if (gb) { gb.classList.add('flash-good'); setTimeout(() => gb.classList.remove('flash-good'), 800); }
+    document.getElementById('quest').innerHTML = '🎉 <b>В точку!</b> (+1 очко)';
+    game.target._marker.openPopup();
+    setTimeout(nextRound, 1200);
+  } else {
+    game.misses++;
+    if (gb) { gb.classList.remove('flash-bad'); void gb.offsetWidth; gb.classList.add('flash-bad'); }
+    document.getElementById('quest').innerHTML =
+      game.misses >= 3
+        ? `Не он! ${p.ico} <b>${p.name}</b> (${fmtM(d)} м от цели). Пока целим на… 🔎`
+        : `Мимо: это ${p.name} (${fmtM(d)} м от цели). Попробуй ещё!`;
+  }
+}
+function fmtM(m) { return m >= 1000 ? (m/1000).toFixed(1) + ' км' : Math.round(m) + ' м'; }
+
+// ---------- Погода ----------
+const WCODE = c => c===0?'☀️':c<3?'🌤️':c===3?'☁️':c<48?'🌫️':c<58?'🌦️':c<68?'🌧️':c<78?'🌨️':c<83?'🌧️':c<88?'🌨️':'⛈️';
+(async () => {
+  try {
+    const r = await fetch('https://api.open-meteo.com/v1/forecast?latitude=54.8375&longitude=75.0732&current=temperature_2m,wind_speed_10m,weather_code&timezone=auto');
+    const j = await r.json();
+    const c = j.current;
+    document.getElementById('weatherChip').innerHTML =
+      `<span style="font-size:18px">${WCODE(c.weather_code)}</span>
+       <span class="t">${Math.round(c.temperature_2m)}°C</span>
+       <span class="d">ветер ${Math.round(c.wind_speed_10m)} м/с</span>`;
+  } catch (e) { document.getElementById('weatherChip').innerHTML = '<span class="d">погода недоступна</span>'; }
+})();
+
+// ---------- Моё местоположение ----------
+let userMarker = null, userCircle = null;
+document.getElementById('locBtn').onclick = () => {
+  if (!navigator.geolocation) { alert('Геолокация не поддерживается этим устройством'); return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    const ll = [pos.coords.latitude, pos.coords.longitude];
+    if (userMarker) map.removeLayer(userMarker);
+    if (userCircle) map.removeLayer(userCircle);
+    userMarker = L.marker(ll, { icon: L.divIcon({ className:'', html:'<div class="user-dot"></div>', iconSize:[18,18], iconAnchor:[9,9] }) }).addTo(map);
+    userCircle = L.circle(ll, { radius: pos.coords.accuracy || 30, color:'#8b5cff', fillOpacity:.12, weight:1 }).addTo(map);
+    map.flyTo(ll, Math.max(15, map.getZoom()), { duration:.8 });
+    let nearest = POI[0], nd = 1e15;
+    POI.forEach(p => { const d = map.distance(L.latLng(ll), L.latLng(p.pos)); if (d < nd) { nd = d; nearest = p; } });
+    userMarker.bindPopup(`<div class="pop-title">📍 Ты здесь</div>
+      <div class="pop-cat">точность ±${Math.round(pos.coords.accuracy||30)} м</div>
+      <div class="pop-cat">Ближайший объект: ${nearest.ico} ${nearest.name} — ${fmtM(nd)}</div>
+      <div class="pop-actions"><a target="_blank" rel="noopener" href="https://yandex.ru/maps/?rtext=~${ll[0]},${ll[1]}~${nearest.pos[0]},${nearest.pos[1]}">🚗 маршрут до ${nearest.name}</a></div>`);
+  }, () => alert('Не удалось получить местоположение. Проверь разрешения браузера.'), { enableHighAccuracy:true });
+};
+
+// ---------- Поделиться ----------
+document.getElementById('shareBtn').onclick = async () => {
+  const data = { title:'Карта пгт Оконешниково', text:'Интерактивная карта посёлка Оконешниково: улицы, дома, достопримечательности',
+    url:'https://comesee10.github.io/' };
+  if (navigator.share) { try { await navigator.share(data); } catch(e){} }
+  else { navigator.clipboard?.writeText(data.url); alert(data.url); }
+};
+
+// ---------- Табы ----------
+const tabs = { poi:poiList, streets:streetList, game:gameBox, info:infoBox };
+document.querySelectorAll('.panel-tabs button').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('.panel-tabs button').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    const t = b.dataset.tab;
+    Object.entries(tabs).forEach(([k, el]) => el.style.display = k === t ? '' : 'none');
+    searchWrap.style.display = (t === 'game' || t === 'info') ? 'none' : '';
+    filterInp.value = '';
+    renderPOI(); renderStreets();
+    if (t === 'game') renderGame();
+  };
+});
 filterInp.addEventListener('input', () => {
   const q = filterInp.value.trim();
-  document.querySelectorAll('.panel-tabs button').forEach(b => {
-    if (b.classList.contains('active')) {
-      (b.dataset.tab === 'poi' ? renderPOI : renderStreets)(q);
-    }
-  });
+  const active = document.querySelector('.panel-tabs button.active')?.dataset.tab;
+  if (active === 'poi') renderPOI(q);
+  if (active === 'streets') renderStreets(q);
 });
 
+// ---------- Сервис-воркер ----------
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+
+// ---------- Раскладка ----------
 const toggle = document.getElementById('toggle');
 const panel = document.getElementById('panel');
 function syncToggle() {
@@ -266,39 +467,19 @@ function syncToggle() {
   toggle.textContent = panel.classList.contains('hidden') ? '◀' : '▶';
 }
 toggle.onclick = () => { panel.classList.toggle('hidden'); syncToggle(); };
-// На телефонах панель по умолчанию скрыта — сразу видно карту
 if (window.innerWidth < 720) panel.classList.add('hidden');
 syncToggle();
 
-// PWA: регистрация сервис-воркера (офлайн-кэш)
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
-}
-
-document.querySelectorAll('.panel-tabs button').forEach(b => {
-  b.onclick = () => {
-    document.querySelectorAll('.panel-tabs button').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    poiList.style.display  = b.dataset.tab === 'poi' ? '' : 'none';
-    streetList.style.display = b.dataset.tab === 'streets' ? '' : 'none';
-    filterInp.value = '';
-    renderPOI(); renderStreets();
-  };
-});
-
-// Страховка раскладки: высота карты = высота окна − шапка
-const wrap = document.querySelector("header").nextElementSibling;
+const wrap = document.querySelector('header').nextElementSibling;
 function sizeFix() {
-  const h = window.innerHeight - 58;
-  if (wrap.clientHeight < 200) {
-    wrap.style.height = h + "px";
-    wrap.style.flex = "0 0 auto";
-  }
+  const h = window.innerHeight - (window.innerWidth < 720 ? 54 : 58);
+  if (wrap.clientHeight < 200) { wrap.style.height = h + 'px'; wrap.style.flex = '0 0 auto'; }
   map.invalidateSize();
 }
 window.addEventListener('resize', sizeFix);
 window.addEventListener('load', sizeFix);
 sizeFix();
+renderGame();
 
 setTimeout(() => { try { map.fitBounds(townPoly.getBounds(), { padding: window.innerWidth < 720 ? [40,40] : [60, 360] }); } catch(e){} }, 400);
 </script>
