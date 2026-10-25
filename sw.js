@@ -1,5 +1,5 @@
 /* Сервис-воркер: офлайн-кэш сайта и тайлов карты */
-const CACHE = 'okoneshnikowo-v1';
+const CACHE = 'okoneshnikowo-v2';
 const ASSETS = [
   './index.html',
   './manifest.json',
@@ -44,7 +44,18 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Свои файлы: cache-first, обновление в фоне
+  // Свои файлы: обновление в фоне, а главная — сеть-первая (чтобы обновления доходили)
+  const isIndex = url.pathname === '/' || url.pathname.endsWith('index.html');
+  if (isIndex) {
+    e.respondWith(
+      fetch(e.request).then(resp => {
+        const clone = resp.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+        return resp;
+      }).catch(() => caches.open(CACHE).then(c => c.match(e.request)))
+    );
+    return;
+  }
   e.respondWith(
     caches.open(CACHE).then(c =>
       c.match(e.request).then(hit => {
